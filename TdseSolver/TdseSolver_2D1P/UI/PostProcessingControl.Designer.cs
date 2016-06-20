@@ -218,11 +218,6 @@
             0,
             0,
             0});
-            this.RightCrop_NUD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.RightCrop_NUD.Name = "RightCrop_NUD";
             this.RightCrop_NUD.Size = new System.Drawing.Size(54, 20);
             this.RightCrop_NUD.TabIndex = 1;
@@ -243,11 +238,6 @@
             this.LeftCrop_NUD.Location = new System.Drawing.Point(201, 118);
             this.LeftCrop_NUD.Maximum = new decimal(new int[] {
             9999,
-            0,
-            0,
-            0});
-            this.LeftCrop_NUD.Minimum = new decimal(new int[] {
-            1,
             0,
             0,
             0});
@@ -275,11 +265,6 @@
             0,
             0,
             0});
-            this.TopCrop_NUD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
             this.TopCrop_NUD.Name = "TopCrop_NUD";
             this.TopCrop_NUD.Size = new System.Drawing.Size(54, 20);
             this.TopCrop_NUD.TabIndex = 1;
@@ -300,11 +285,6 @@
             this.BottomCrop_NUD.Location = new System.Drawing.Point(241, 152);
             this.BottomCrop_NUD.Maximum = new decimal(new int[] {
             9999,
-            0,
-            0,
-            0});
-            this.BottomCrop_NUD.Minimum = new decimal(new int[] {
-            1,
             0,
             0,
             0});
