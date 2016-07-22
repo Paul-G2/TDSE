@@ -10,7 +10,7 @@ namespace TdseSolver_2D1P
     /// <summary>
     /// This class provides methods for upsampling a wavefunction (so that it looks smoother).
     /// </summary>
-    class Upsampler : TdseSolver.Proc
+    class Upsampler : TdseUtils.Proc
     {
         // Class data
         string m_inputDir           = "";

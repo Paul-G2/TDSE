@@ -10,7 +10,7 @@ namespace TdseSolver_2D1P
     /// <summary>
     /// This class provides methods for cropping a wavefunction to a smaller grid.
     /// </summary>
-    class Cropper : TdseSolver.Proc
+    class Cropper : TdseUtils.Proc
     {
         // Class data
         string m_inputDir           = "";

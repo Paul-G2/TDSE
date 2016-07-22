@@ -52,8 +52,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithms\Colorer.cs" />
-    <Compile Include="Algorithms\Complex.cs" />
-    <Compile Include="Algorithms\Proc.cs" />
     <Compile Include="Algorithms\Cropper.cs" />
     <Compile Include="Algorithms\VisscherWf.cs" />
     <Compile Include="UI\MainForm.cs">
@@ -61,12 +59,6 @@
     </Compile>
     <Compile Include="UI\MainForm.Designer.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
-    </Compile>
-    <Compile Include="UI\NonModalMessageBox.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\NonModalMessageBox.Designer.cs">
-      <DependentUpon>NonModalMessageBox.cs</DependentUpon>
     </Compile>
     <Compile Include="UI\PostProcessingControl.cs">
       <SubType>UserControl</SubType>
@@ -86,12 +78,6 @@
       <DependentUpon>SolverControl.cs</DependentUpon>
     </Compile>
     <Compile Include="Algorithms\Upsampler.cs" />
-    <Compile Include="UI\ColorCodeBuilder.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="UI\ColorCodeBuilder.Designer.cs">
-      <DependentUpon>ColorCodeBuilder.cs</DependentUpon>
-    </Compile>
     <Compile Include="UI\VCodeBuilder.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -120,9 +106,6 @@
     <EmbeddedResource Include="UI\SolverControl.resx">
       <DependentUpon>SolverControl.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UI\ColorCodeBuilder.resx">
-      <DependentUpon>ColorCodeBuilder.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="UI\VCodeBuilder.resx">
       <DependentUpon>VCodeBuilder.cs</DependentUpon>
     </EmbeddedResource>
@@ -139,6 +122,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="System\App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TdseUtils\TdseUtils.csproj">
+      <Project>{0ac8e9de-2cf1-4582-a341-8073b7081ba0}</Project>
+      <Name>TdseUtils</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

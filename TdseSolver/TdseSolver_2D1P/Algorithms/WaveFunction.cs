@@ -189,20 +189,7 @@ namespace TdseSolver_2D1P
         /// </summary>
         public void Normalize()
         {
-            float scaleFactor = (float) ( 1.0/Math.Sqrt(NormSq()) );
-
-            int nx = GridSizeX;
-            int ny = GridSizeY;
-            for (int x = 0; x < nx; x++)
-            {
-                float[] ReX = m_realPart[x];
-                float[] ImX = m_imagPart[x];
-                for (int y = 0; y < ny; y++)
-                {
-                    ReX[y] *= scaleFactor;
-                    ImX[y] *= scaleFactor;
-                }
-            }
+            ScaleBy( (float)( 1.0/Math.Sqrt(NormSq()) ) );
         }
 
 
@@ -239,48 +226,59 @@ namespace TdseSolver_2D1P
             int ny = GridSizeY;
             int nxm1 = nx - 1;
             int nym1 = ny - 1;
+            int nxm2 = nx - 2;
+            int nym2 = ny - 2;
+
             float keFactor = 1.0f / (2 * mass *m_latticeSpacing * m_latticeSpacing);
 
-            float alpha = -1.0f / 6.0f;
-            float gamma = -2.0f / 3.0f;
-            float beta  = -4.0f * (alpha + gamma);
+            float alpha = 5.0f;
+            float beta  = -4.0f / 3.0f;
+            float delta = 1.0f / 12.0f;
 
             WaveFunction outWf = new WaveFunction(nx, ny, m_latticeSpacing);
 
 
             // Compute H * Wf
-            LoopDelegate YLoop1 = (x) =>
+            LoopDelegate YLoop = (x) =>
             {
                 int xp = (x < nxm1) ? x + 1 : 0;
                 int xm = (x > 0) ? x - 1 : nxm1;
+                int xpp = (x < nxm2) ? x + 2 : (x == nxm2) ? 0 : 1;
+                int xmm = (x > 1) ? x - 2 : (x > 0) ? nxm1 : nxm2;
 
                 float[] Vx = V[x];
-                float[] inWfRx  = m_realPart[x];
-                float[] inWfRxm = m_realPart[xm];
-                float[] inWfRxp = m_realPart[xp];
-                float[] inWfIx  = m_imagPart[x];
-                float[] inWfIxm = m_imagPart[xm];
-                float[] inWfIxp = m_imagPart[xp];
-                float[] outWfRx = outWf.RealPart[x];
-                float[] outWfIx = outWf.ImagPart[x];
+                float[] inWfRx   = m_realPart[x];
+                float[] inWfRxm  = m_realPart[xm];
+                float[] inWfRxp  = m_realPart[xp];
+                float[] inWfRxmm = m_realPart[xmm];
+                float[] inWfRxpp = m_realPart[xpp];
+                float[] inWfIx   = m_imagPart[x];
+                float[] inWfIxm  = m_imagPart[xm];
+                float[] inWfIxp  = m_imagPart[xp];
+                float[] inWfIxmm = m_imagPart[xmm];
+                float[] inWfIxpp = m_imagPart[xpp];
+                float[] outWfRx  = outWf.RealPart[x];
+                float[] outWfIx  = outWf.ImagPart[x];
 
                 for (int y = 0; y < ny; y++)
                 {
                     int yp = (y < nym1) ? y + 1 : 0;
                     int ym = (y > 0) ? y - 1 : nym1;
+                    int ypp = (y < nym2) ? y + 2 : (y == nym2) ? 0 : 1;
+                    int ymm = (y > 1) ? y - 2 : (y > 0) ? nym1 : nym2;
 
                     // Kinetic energy terms. 
                     // (This discretization of the 2nd derivative has better rotational invariance than the standard one)
                     float kR = keFactor * (
-                        alpha * (inWfRxm[ym] + inWfRxp[ym] + inWfRxm[yp] + inWfRxp[yp]) +
-                        gamma * (inWfRx[ym] + inWfRx[yp] + inWfRxm[y] + inWfRxp[y]) +
-                        beta * inWfRx[y]
+                        alpha * inWfRx[y] +
+                        beta  * (inWfRx[ym] + inWfRx[yp] + inWfRxm[y] + inWfRxp[y]) +
+                        delta * (inWfRx[ymm] + inWfRx[ypp] + inWfRxmm[y] + inWfRxpp[y])
                     );
 
                     float kI = keFactor * (
-                        alpha * (inWfIxm[ym] + inWfIxp[ym] + inWfIxm[yp] + inWfIxp[yp]) +
-                        gamma * (inWfIx[ym] + inWfIx[yp] + inWfIxm[y] + inWfIxp[y]) +
-                        beta * inWfIx[y]
+                        alpha * inWfIx[y] +
+                        beta  * (inWfIx[ym] + inWfIx[yp] + inWfIxm[y] + inWfIxp[y]) +
+                        delta * (inWfIx[ymm] + inWfIx[ypp] + inWfIxmm[y] + inWfIxpp[y])
                     );
 
                     // Potential energy terms
@@ -293,11 +291,11 @@ namespace TdseSolver_2D1P
             };
             if (multiThread)
             {
-                Parallel.For(0, nx, x => { YLoop1(x); });
+                Parallel.For(0, nx, x => { YLoop(x); });
             }
             else
             {
-                for (int x = 0; x < nx; x++) { YLoop1(x); }
+                for (int x = 0; x < nx; x++) { YLoop(x); }
             }
 
             return outWf;

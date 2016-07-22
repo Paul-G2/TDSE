@@ -18,7 +18,7 @@ namespace TdseSolver_2D1P
         public float[][] ImagPartM; // Imaginary part at time t - dt/2
         public float[][] RealPart;  // Real part at time t
         public float[][] ImagPartP; // Imaginary part at time t + dt/2
-        public float LatticeSpacing = 2.0f;
+        public float LatticeSpacing = 1.0f;
 
         /// <summary>
         /// Constructor
@@ -44,7 +44,7 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Constructor. Initializes a Visscher wavefunction from an ordinary wavefunction.
         /// </summary>
-        public VisscherWf(WaveFunction inputWf, float[][]V, float mass, float dt, bool multiThread=true)
+        public VisscherWf(WaveFunction inputWf, float[][] V, float mass, float dt, bool multiThread=true)
         {
             LatticeSpacing = inputWf.LatticeSpacing;
 
@@ -158,9 +158,6 @@ namespace TdseSolver_2D1P
                     outWfI[y] = im;
                 }
             }
-
-
-
 
             return result;
         }

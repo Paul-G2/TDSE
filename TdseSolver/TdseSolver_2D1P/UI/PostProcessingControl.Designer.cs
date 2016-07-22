@@ -34,25 +34,25 @@
             this.Main_ProgressBar = new System.Windows.Forms.ProgressBar();
             this.ReColor_Btn = new System.Windows.Forms.Button();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.Crop_Btn = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
+            this.LeftCrop_NUD = new System.Windows.Forms.NumericUpDown();
+            this.BottomCrop_NUD = new System.Windows.Forms.NumericUpDown();
+            this.TopCrop_NUD = new System.Windows.Forms.NumericUpDown();
+            this.RightCrop_NUD = new System.Windows.Forms.NumericUpDown();
             this.UpsampleFactor_NUD = new System.Windows.Forms.NumericUpDown();
             this.Upsample_Btn = new System.Windows.Forms.Button();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.InputDir_TextBox = new System.Windows.Forms.TextBox();
             this.SelectFolder_Btn = new System.Windows.Forms.Button();
-            this.Crop_Btn = new System.Windows.Forms.Button();
-            this.RightCrop_NUD = new System.Windows.Forms.NumericUpDown();
-            this.LeftCrop_NUD = new System.Windows.Forms.NumericUpDown();
-            this.TopCrop_NUD = new System.Windows.Forms.NumericUpDown();
-            this.BottomCrop_NUD = new System.Windows.Forms.NumericUpDown();
             this.groupBox10.SuspendLayout();
             this.groupBox8.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.LeftCrop_NUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.BottomCrop_NUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TopCrop_NUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RightCrop_NUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.UpsampleFactor_NUD)).BeginInit();
             this.groupBox7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.RightCrop_NUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.LeftCrop_NUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TopCrop_NUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.BottomCrop_NUD)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox10
@@ -126,6 +126,16 @@
             this.groupBox8.TabIndex = 14;
             this.groupBox8.TabStop = false;
             // 
+            // Crop_Btn
+            // 
+            this.Crop_Btn.Location = new System.Drawing.Point(209, 30);
+            this.Crop_Btn.Name = "Crop_Btn";
+            this.Crop_Btn.Size = new System.Drawing.Size(114, 38);
+            this.Crop_Btn.TabIndex = 0;
+            this.Crop_Btn.Text = "Crop";
+            this.Crop_Btn.UseVisualStyleBackColor = true;
+            this.Crop_Btn.Click += new System.EventHandler(this.Crop_Btn_Click);
+            // 
             // label12
             // 
             this.label12.AutoSize = true;
@@ -134,6 +144,99 @@
             this.label12.Size = new System.Drawing.Size(43, 13);
             this.label12.TabIndex = 2;
             this.label12.Text = "Factor :";
+            // 
+            // LeftCrop_NUD
+            // 
+            this.LeftCrop_NUD.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.LeftCrop_NUD.Location = new System.Drawing.Point(201, 118);
+            this.LeftCrop_NUD.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.LeftCrop_NUD.Name = "LeftCrop_NUD";
+            this.LeftCrop_NUD.Size = new System.Drawing.Size(54, 20);
+            this.LeftCrop_NUD.TabIndex = 1;
+            this.LeftCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.LeftCrop_NUD.UpDownAlign = System.Windows.Forms.LeftRightAlignment.Left;
+            this.LeftCrop_NUD.Value = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
+            // 
+            // BottomCrop_NUD
+            // 
+            this.BottomCrop_NUD.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.BottomCrop_NUD.Location = new System.Drawing.Point(241, 152);
+            this.BottomCrop_NUD.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.BottomCrop_NUD.Name = "BottomCrop_NUD";
+            this.BottomCrop_NUD.Size = new System.Drawing.Size(54, 20);
+            this.BottomCrop_NUD.TabIndex = 1;
+            this.BottomCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.BottomCrop_NUD.Value = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
+            // 
+            // TopCrop_NUD
+            // 
+            this.TopCrop_NUD.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.TopCrop_NUD.Location = new System.Drawing.Point(241, 86);
+            this.TopCrop_NUD.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.TopCrop_NUD.Name = "TopCrop_NUD";
+            this.TopCrop_NUD.Size = new System.Drawing.Size(54, 20);
+            this.TopCrop_NUD.TabIndex = 1;
+            this.TopCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.TopCrop_NUD.Value = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
+            // 
+            // RightCrop_NUD
+            // 
+            this.RightCrop_NUD.Increment = new decimal(new int[] {
+            100,
+            0,
+            0,
+            0});
+            this.RightCrop_NUD.Location = new System.Drawing.Point(277, 118);
+            this.RightCrop_NUD.Maximum = new decimal(new int[] {
+            9999,
+            0,
+            0,
+            0});
+            this.RightCrop_NUD.Name = "RightCrop_NUD";
+            this.RightCrop_NUD.Size = new System.Drawing.Size(54, 20);
+            this.RightCrop_NUD.TabIndex = 1;
+            this.RightCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.RightCrop_NUD.Value = new decimal(new int[] {
+            1024,
+            0,
+            0,
+            0});
             // 
             // UpsampleFactor_NUD
             // 
@@ -195,109 +298,6 @@
             this.SelectFolder_Btn.UseVisualStyleBackColor = true;
             this.SelectFolder_Btn.Click += new System.EventHandler(this.SelectFolder_Btn_Click);
             // 
-            // Crop_Btn
-            // 
-            this.Crop_Btn.Location = new System.Drawing.Point(209, 30);
-            this.Crop_Btn.Name = "Crop_Btn";
-            this.Crop_Btn.Size = new System.Drawing.Size(114, 38);
-            this.Crop_Btn.TabIndex = 0;
-            this.Crop_Btn.Text = "Crop";
-            this.Crop_Btn.UseVisualStyleBackColor = true;
-            this.Crop_Btn.Click += new System.EventHandler(this.Crop_Btn_Click);
-            // 
-            // RightCrop_NUD
-            // 
-            this.RightCrop_NUD.Increment = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-            this.RightCrop_NUD.Location = new System.Drawing.Point(277, 118);
-            this.RightCrop_NUD.Maximum = new decimal(new int[] {
-            9999,
-            0,
-            0,
-            0});
-            this.RightCrop_NUD.Name = "RightCrop_NUD";
-            this.RightCrop_NUD.Size = new System.Drawing.Size(54, 20);
-            this.RightCrop_NUD.TabIndex = 1;
-            this.RightCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.RightCrop_NUD.Value = new decimal(new int[] {
-            1024,
-            0,
-            0,
-            0});
-            // 
-            // LeftCrop_NUD
-            // 
-            this.LeftCrop_NUD.Increment = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-            this.LeftCrop_NUD.Location = new System.Drawing.Point(201, 118);
-            this.LeftCrop_NUD.Maximum = new decimal(new int[] {
-            9999,
-            0,
-            0,
-            0});
-            this.LeftCrop_NUD.Name = "LeftCrop_NUD";
-            this.LeftCrop_NUD.Size = new System.Drawing.Size(54, 20);
-            this.LeftCrop_NUD.TabIndex = 1;
-            this.LeftCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.LeftCrop_NUD.UpDownAlign = System.Windows.Forms.LeftRightAlignment.Left;
-            this.LeftCrop_NUD.Value = new decimal(new int[] {
-            1024,
-            0,
-            0,
-            0});
-            // 
-            // TopCrop_NUD
-            // 
-            this.TopCrop_NUD.Increment = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-            this.TopCrop_NUD.Location = new System.Drawing.Point(241, 86);
-            this.TopCrop_NUD.Maximum = new decimal(new int[] {
-            9999,
-            0,
-            0,
-            0});
-            this.TopCrop_NUD.Name = "TopCrop_NUD";
-            this.TopCrop_NUD.Size = new System.Drawing.Size(54, 20);
-            this.TopCrop_NUD.TabIndex = 1;
-            this.TopCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.TopCrop_NUD.Value = new decimal(new int[] {
-            1024,
-            0,
-            0,
-            0});
-            // 
-            // BottomCrop_NUD
-            // 
-            this.BottomCrop_NUD.Increment = new decimal(new int[] {
-            100,
-            0,
-            0,
-            0});
-            this.BottomCrop_NUD.Location = new System.Drawing.Point(241, 152);
-            this.BottomCrop_NUD.Maximum = new decimal(new int[] {
-            9999,
-            0,
-            0,
-            0});
-            this.BottomCrop_NUD.Name = "BottomCrop_NUD";
-            this.BottomCrop_NUD.Size = new System.Drawing.Size(54, 20);
-            this.BottomCrop_NUD.TabIndex = 1;
-            this.BottomCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.BottomCrop_NUD.Value = new decimal(new int[] {
-            1024,
-            0,
-            0,
-            0});
-            // 
             // PostProcessingControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -310,13 +310,13 @@
             this.groupBox10.ResumeLayout(false);
             this.groupBox8.ResumeLayout(false);
             this.groupBox8.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.LeftCrop_NUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.BottomCrop_NUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TopCrop_NUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RightCrop_NUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.UpsampleFactor_NUD)).EndInit();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.RightCrop_NUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.LeftCrop_NUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TopCrop_NUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.BottomCrop_NUD)).EndInit();
             this.ResumeLayout(false);
 
         }

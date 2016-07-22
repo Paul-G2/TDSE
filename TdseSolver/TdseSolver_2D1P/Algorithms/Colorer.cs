@@ -11,19 +11,19 @@ namespace TdseSolver_2D1P
     /// <summary>
     /// This class creates wavefunction vtk files with specified color schemes. 
     /// </summary>
-    class Colorer : TdseSolver.Proc
+    class Colorer : TdseUtils.Proc
     {
         // Class data
-        string           m_inputDir           = "";
-        ColorCodeBuilder m_colorBuilder       = null;
-        int              m_numFilesToProcess  = 0;
-        int              m_currentFileIndex   = 0;
+        string                 m_inputDir           = "";
+        TdseUtils.ColorBuilder m_colorBuilder       = null;
+        int                    m_numFilesToProcess  = 0;
+        int                    m_currentFileIndex   = 0;
 
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public Colorer(string inputDir, ColorCodeBuilder colorBuilder)
+        public Colorer(string inputDir, TdseUtils.ColorBuilder colorBuilder)
         {
             m_inputDir = inputDir;
             m_colorBuilder = colorBuilder;

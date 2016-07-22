@@ -215,7 +215,7 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Handles Progress events from the Evolver.
         /// </summary>
-        void Evolver_ProgressEvent(TdseSolver.Proc sender)
+        void Evolver_ProgressEvent(TdseUtils.Proc sender)
         {
             Evolver evolver = (Evolver) sender;
 
@@ -245,7 +245,7 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Handles Completion events from the Evolver.
         /// </summary>
-        void Evolver_CompletionEvent(TdseSolver.Proc sender, RunWorkerCompletedEventArgs e)
+        void Evolver_CompletionEvent(TdseUtils.Proc sender, RunWorkerCompletedEventArgs e)
         {
             // Update the UI
             RunStop_Btn.Text = "Run";
@@ -330,16 +330,16 @@ namespace TdseSolver_2D1P
         {
             // Get the output drive
             string outputDrive = Properties.Settings.Default.OutputDrive;
-            if (string.IsNullOrEmpty(outputDrive)) { outputDrive = "D"; }
+            if (string.IsNullOrEmpty(outputDrive)) { outputDrive = "Z"; }
             outputDrive = outputDrive.Substring(0,1);
 
             DriveInfo[] driveInfo = DriveInfo.GetDrives();
             if (driveInfo.Where(d => d.IsReady && d.Name.StartsWith(outputDrive)).Count() < 1) 
             { 
-                outputDrive = "D"; 
+                outputDrive = "Z"; 
                 if (driveInfo.Where(d => d.IsReady && d.Name.StartsWith(outputDrive)).Count() < 1) 
                 { 
-                    outputDrive = "Z"; 
+                    outputDrive = "D"; 
                     if (driveInfo.Where(d => d.IsReady && d.Name.StartsWith(outputDrive)).Count() < 1)
                     {
                         outputDrive = "C";

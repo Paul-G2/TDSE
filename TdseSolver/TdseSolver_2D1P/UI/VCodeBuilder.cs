@@ -65,7 +65,7 @@ namespace TdseSolver_2D1P
             if ( assembly == null )
             {
                 string msg = string.IsNullOrEmpty(errorMessages) ? "Unknown error." : errorMessages;
-                new NonModalMessageBox(msg, "Compiler Errors").Show(this);
+                new TdseUtils.NonModalMessageBox(msg, "Compiler Errors").Show(this);
             }
             else
             {
@@ -87,7 +87,7 @@ namespace TdseSolver_2D1P
             if ( assembly == null )
             {
                 string msg = string.IsNullOrEmpty(errorMessages) ? "Unknown error." : errorMessages;
-                new NonModalMessageBox(msg, "Compiler Errors").Show(this);
+                new TdseUtils.NonModalMessageBox(msg, "Compiler Errors").Show(this);
                 return;
             }
             else

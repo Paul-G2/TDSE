@@ -16,10 +16,10 @@ namespace TdseSolver_2D1P
     public partial class PostProcessingControl : UserControl
     {
         // Class data
-        FolderBrowserDialog m_folderBrowserDlg = null;
-        ColorCodeBuilder    m_colorBuilder     = null;
-        SolverControl       m_associatedSolver = null;
-        TdseSolver.Proc     m_currentProc      = null;
+        FolderBrowserDialog       m_folderBrowserDlg = null;
+        TdseUtils.ColorBuilder    m_colorBuilder     = null;
+        SolverControl             m_associatedSolver = null;
+        TdseUtils.Proc            m_currentProc      = null;
 
 
         /// <summary>
@@ -30,7 +30,7 @@ namespace TdseSolver_2D1P
             InitializeComponent();
 
             m_folderBrowserDlg = new FolderBrowserDialog();
-            m_colorBuilder = new ColorCodeBuilder();
+            m_colorBuilder = new TdseUtils.ColorBuilder();
 
             // Load last-used settings
             string lastDir = Properties.Settings.Default.LastPostProcFolder;
@@ -272,7 +272,7 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Handler for progress events from the current proc.
         /// </summary>
-        void CurrentProc_ProgressEvent(TdseSolver.Proc sender)
+        void CurrentProc_ProgressEvent(TdseUtils.Proc sender)
         {
             // Update the progress bar
             int prog = -1;
@@ -301,7 +301,7 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Handler for completion events from the current proc.
         /// </summary>
-        void CurrentProc_CompletionEvent(TdseSolver.Proc sender, RunWorkerCompletedEventArgs e)
+        void CurrentProc_CompletionEvent(TdseUtils.Proc sender, RunWorkerCompletedEventArgs e)
         {
             PauseResume_Btn.Text = "Pause";
             PauseResume_Btn.Enabled = false;

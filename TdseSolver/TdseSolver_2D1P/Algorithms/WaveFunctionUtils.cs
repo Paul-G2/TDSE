@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Drawing;
-using ComplexS = TdseSolver.Complex;
+using ComplexS = TdseUtils.Complex;
 
 
 namespace TdseSolver_2D1P

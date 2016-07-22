@@ -7,7 +7,7 @@ namespace TdseSolver_2D1P
     /// <summary>
     /// This class computes the time evolution of a wavefunction.
     /// </summary>
-    class Evolver : TdseSolver.Proc
+    class Evolver : TdseUtils.Proc
     {
         // Declare a delegate for computing the potential energy
         public delegate float VDelegate(float x, float y, float t, float mass, float sx, float sy);
@@ -154,38 +154,46 @@ namespace TdseSolver_2D1P
             int ny = wf.GridSizeY;
             int nxm1 = nx - 1;
             int nym1 = ny - 1;
+            int nxm2 = nx - 2;
+            int nym2 = ny - 2;
             float keFactor = 1.0f / (2 * m_particleMass * wf.LatticeSpacing * wf.LatticeSpacing);
 
-            float alpha = -1.0f / 6.0f;
-            float gamma = -2.0f / 3.0f;
-            float beta  = -4.0f * (alpha + gamma);
+            float alpha = 5.0f;
+            float beta  = -4.0f / 3.0f;
+            float delta = 1.0f / 12.0f;
 
 
             // Compute the next real part in terms of the current imaginary part
             LoopDelegate YLoop1 = (x) =>
             {
-                int xp = (x < nxm1) ? x + 1 : 0;
-                int xm = (x > 0) ? x - 1 : nxm1;
+                int xp  = (x < nxm1) ? x + 1 : 0;
+                int xm  = (x > 0) ? x - 1 : nxm1;
+                int xpp = (x < nxm2) ? x + 2 : (x == nxm2) ? 0 : 1;
+                int xmm = (x > 1) ? x - 2 : (x > 0) ? nxm1 : nxm2;
 
                 float[] Vx = V[x];
-                float[] wfRx  = wf.RealPart[x];
-                float[] wfIxP0  = wf.ImagPartP[x];
-                float[] wfIxPM = wf.ImagPartP[xm];
-                float[] wfIxPP = wf.ImagPartP[xp];
+                float[] wfRx    = wf.RealPart[x];
+                float[] wfIPx   = wf.ImagPartP[x];
+                float[] wfIPxm  = wf.ImagPartP[xm];
+                float[] wfIPxp  = wf.ImagPartP[xp];
+                float[] wfIPxmm = wf.ImagPartP[xmm];
+                float[] wfIPxpp = wf.ImagPartP[xpp];
 
                 for (int y = 0; y < ny; y++)
                 {
                     int yp = (y < nym1) ? y + 1 : 0;
                     int ym = (y > 0) ? y - 1 : nym1;
+                    int ypp = (y < nym2) ? y + 2 : (y == nym2) ? 0 : 1;
+                    int ymm = (y > 1) ? y - 2 : (y > 0) ? nym1 : nym2;
 
                     // This discretization of the 2nd derivative has better rotational invariance than the standard one
                     float ke = keFactor * (
-                        alpha * (wfIxPM[ym] + wfIxPP[ym] + wfIxPM[yp] + wfIxPP[yp]) +
-                        gamma * (wfIxP0[ym] + wfIxP0[yp] + wfIxPM[y] + wfIxPP[y]) +
-                        beta * wfIxP0[y]
+                        alpha * wfIPx[y] +
+                        beta  * (wfIPx[ym] + wfIPx[yp] + wfIPxm[y] + wfIPxp[y]) +
+                        delta * (wfIPx[ymm] + wfIPx[ypp] + wfIPxmm[y] + wfIPxpp[y])
                     );
 
-                    float pe = Vx[y] * wfIxP0[y];
+                    float pe = Vx[y] * wfIPx[y];
 
                     wfRx[y] += dt * (ke + pe);
                 }
@@ -210,29 +218,35 @@ namespace TdseSolver_2D1P
             {
                 int xp = (x < nxm1) ? x + 1 : 0;
                 int xm = (x > 0) ? x - 1 : nxm1;
+                int xpp = (x < nxm2) ? x + 2 : (x == nxm2) ? 0 : 1;
+                int xmm = (x > 1) ? x - 2 : (x > 0) ? nxm1 : nxm2;
 
                 float[] Vx = V[x];
-                float[] wfIxP0 = wf.ImagPartP[x];
-                float[] wfIxM0 = wf.ImagPartM[x];
-                float[] wfRx0  = wf.RealPart[x];
-                float[] wfRxM  = wf.RealPart[xm];
-                float[] wfRxP  = wf.RealPart[xp];
+                float[] wfIPx  = wf.ImagPartP[x];
+                float[] wfIMx  = wf.ImagPartM[x];
+                float[] wfRx   = wf.RealPart[x];
+                float[] wfRxm  = wf.RealPart[xm];
+                float[] wfRxp  = wf.RealPart[xp];
+                float[] wfRxmm = wf.RealPart[xmm];
+                float[] wfRxpp = wf.RealPart[xpp];
 
                 for (int y = 0; y < ny; y++)
                 {
                     int yp = (y < nym1) ? y + 1 : 0;
                     int ym = (y > 0) ? y - 1 : nym1;
+                    int ypp = (y < nym2) ? y + 2 : (y == nym2) ? 0 : 1;
+                    int ymm = (y > 1) ? y - 2 : (y > 0) ? nym1 : nym2;
 
                     // This discretization of the 2nd derivative has better rotational invariance than the standard one
                     float ke = keFactor * (
-                        alpha * (wfRxM[ym] + wfRxP[ym] + wfRxM[yp] + wfRxP[yp]) +
-                        gamma * (wfRx0[ym] + wfRx0[yp] + wfRxM[y] + wfRxP[y]) +
-                        beta * wfRx0[y]
+                        alpha * wfRx[y] +
+                        beta  * (wfRx[ym] + wfRx[yp] + wfRxm[y] + wfRxp[y]) +
+                        delta * (wfRx[ymm] + wfRx[ypp] + wfRxmm[y] + wfRxpp[y])
                     );
 
-                    float pe = Vx[y] * wfRx0[y];
+                    float pe = Vx[y] * wfRx[y];
 
-                    wfIxP0[y] = wfIxM0[y] - dt * (ke + pe);
+                    wfIPx[y] = wfIMx[y] - dt * (ke + pe);
                 }
             };
             if (multiThread)
