@@ -42,10 +42,10 @@ namespace TdseSolver_2D1P
                 if (!string.IsNullOrEmpty(cropString))
                 {
                     string[] comps = cropString.Split(',');
-                    LeftCrop_NUD.Value   = int.Parse(comps[0]);
-                    TopCrop_NUD.Value    = int.Parse(comps[1]);
-                    RightCrop_NUD.Value  = int.Parse(comps[2]);
-                    BottomCrop_NUD.Value = int.Parse(comps[3]);
+                    XCrop1_NUD.Value   = int.Parse(comps[0]);
+                    YCrop1_NUD.Value    = int.Parse(comps[1]);
+                    XCrop2_NUD.Value  = int.Parse(comps[2]);
+                    YCrop2_NUD.Value = int.Parse(comps[3]);
                 }
             }
             catch { }
@@ -58,6 +58,11 @@ namespace TdseSolver_2D1P
             catch { }
 
 
+            try
+            {
+                SmoothingFactor_NUD.Value = (decimal) Properties.Settings.Default.SmoothingFactor;
+            }
+            catch { }
         }
 
 
@@ -180,7 +185,45 @@ namespace TdseSolver_2D1P
             EnableInputs(false);
 
             // Run the Upsampler in the background
-            m_currentProc = new Upsampler( inputDir, (double)UpsampleFactor_NUD.Value );
+            m_currentProc = new Upsampler( inputDir, (float)UpsampleFactor_NUD.Value );
+            m_currentProc.ProgressEvent += CurrentProc_ProgressEvent;
+            m_currentProc.CompletionEvent += CurrentProc_CompletionEvent;
+            m_currentProc.RunInBackground();
+        }
+
+
+        /// <summary>
+        /// Click handler for the Smooth button.
+        /// </summary>
+        private void Smooth_Btn_Click(object sender, EventArgs e)
+        {
+            // Check whether we actually have any files to process
+            string inputDir = InputDir_TextBox.Text;
+            if ( !Directory.Exists(inputDir) )
+            {
+                MessageBox.Show("The chosen input directory does not exist.");
+                return;
+            }
+
+            string[] vtkFiles = Directory.GetFiles(inputDir, "*.vtk");
+            if ( (vtkFiles==null) || (vtkFiles.Length == 0) )
+            {
+                MessageBox.Show("No vtk files found in the chosen input directory.");
+                return;
+            }
+
+            // Save the settings
+            Properties.Settings.Default.SmoothingFactor = (float) SmoothingFactor_NUD.Value;
+            Properties.Settings.Default.Save();
+
+            // Update the UI
+            Stop_Btn.Enabled = true;
+            PauseResume_Btn.Enabled = true;
+            Main_ProgressBar.Value = 0;
+            EnableInputs(false);
+
+            // Run the Upsampler in the background
+            m_currentProc = new Smoother( inputDir, (float)SmoothingFactor_NUD.Value );
             m_currentProc.ProgressEvent += CurrentProc_ProgressEvent;
             m_currentProc.CompletionEvent += CurrentProc_CompletionEvent;
             m_currentProc.RunInBackground();
@@ -208,11 +251,11 @@ namespace TdseSolver_2D1P
             }
 
             // Save the settings
-            int L = (int)LeftCrop_NUD.Value;
-            int T = (int)TopCrop_NUD.Value;
-            int R = (int)RightCrop_NUD.Value;
-            int B = (int)BottomCrop_NUD.Value;
-            Properties.Settings.Default.CropSettings = L.ToString() + "," + T.ToString() + "," + R.ToString() + "," + B.ToString();
+            int XminCrop = (int)XCrop1_NUD.Value;
+            int YminCrop = (int)YCrop1_NUD.Value;
+            int XmaxCrop = (int)XCrop2_NUD.Value;
+            int YmaxCrop = (int)YCrop2_NUD.Value;
+            Properties.Settings.Default.CropSettings = XminCrop.ToString() + "," + YminCrop.ToString() + "," + XmaxCrop.ToString() + "," + YmaxCrop.ToString();
             Properties.Settings.Default.Save();
 
             // Update the UI
@@ -222,7 +265,7 @@ namespace TdseSolver_2D1P
             EnableInputs(false);
 
             // Run the Upsampler in the background
-            m_currentProc = new Cropper( inputDir, L, T, R, B );
+            m_currentProc = new Cropper( inputDir, XminCrop, XmaxCrop, YminCrop, YmaxCrop );
             m_currentProc.ProgressEvent += CurrentProc_ProgressEvent;
             m_currentProc.CompletionEvent += CurrentProc_CompletionEvent;
             m_currentProc.RunInBackground();
@@ -280,6 +323,10 @@ namespace TdseSolver_2D1P
             {
                 prog = ( (Upsampler)sender ).Progress;
             }
+            if (sender is Smoother)
+            {
+                prog = ( (Smoother)sender ).Progress;
+            }
             else if (sender is Colorer)
             {
                 prog = ( (Colorer)sender ).Progress;
@@ -331,7 +378,9 @@ namespace TdseSolver_2D1P
             // Set my input dir equal to the last-used output dir
             if ( !e.Cancelled && (e.Error == null) )
             {
-                string lastOutputDir = (sender is Upsampler) ? ((Upsampler)sender).LastOutputDir :
+                string lastOutputDir = 
+                    (sender is Upsampler) ? ((Upsampler)sender).LastOutputDir :
+                    (sender is Smoother) ? ((Smoother)sender).LastOutputDir :
                     (sender is Cropper) ? ((Cropper)sender).LastOutputDir : null;
 
                 if (lastOutputDir != null) 
@@ -353,11 +402,14 @@ namespace TdseSolver_2D1P
         void EnableInputs(bool val)
         {
             SelectFolder_Btn.Enabled = val;
+            InputDir_TextBox.Enabled = val;
             Upsample_Btn.Enabled = val;
+            Smooth_Btn.Enabled = val;
             ReColor_Btn.Enabled = val;
             Crop_Btn.Enabled = val;
-            LeftCrop_NUD.Enabled = RightCrop_NUD.Enabled = TopCrop_NUD.Enabled = BottomCrop_NUD.Enabled = val;
+            XCrop1_NUD.Enabled = XCrop2_NUD.Enabled = YCrop1_NUD.Enabled = YCrop2_NUD.Enabled = val;
             UpsampleFactor_NUD.Enabled = val;
+            SmoothingFactor_NUD.Enabled = val;
         }
 
     }

@@ -107,7 +107,7 @@ namespace TdseSolver_3D1P
                                 {
                                     float[] dataZY = m_data[z][y];
 
-                                    for (int nx = 0; nx < sx2; nx++)
+                                    for (int nx = 0; nx < sx2; nx+=2)
                                     {
                                         float re = dataZY[nx];
                                         float im = dataZY[nx+1];
@@ -139,7 +139,7 @@ namespace TdseSolver_3D1P
                                     {
                                         float[] dataZY = m_data[z][y];
 
-                                        for (int nx = 0; nx < sx2; nx++)
+                                        for (int nx = 0; nx < sx2; nx+=2)
                                         {
                                             Color color = (colorFunc == null) ? Color.Blue : colorFunc(dataZY[nx], dataZY[nx+1], maxAmpl);
 

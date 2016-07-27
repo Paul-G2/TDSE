@@ -42,7 +42,7 @@ namespace TdseSolver_3D1P
             string errorMessages = SetCode( RunParams.FromString(Properties.Settings.Default.LastRunParams).VCode );
 
             if ( !string.IsNullOrEmpty(errorMessages) )
-        {
+            {
                 SetCode( DefaultSnippet );
             }
         }

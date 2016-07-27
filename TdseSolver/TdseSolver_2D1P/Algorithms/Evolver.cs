@@ -91,6 +91,7 @@ namespace TdseSolver_2D1P
 
             // Create a Visscher wf from the input wf
             m_visscherWf = new VisscherWf(m_intialWf, V, m_particleMass, m_deltaT, m_multiThread);
+            m_intialWf = null; // Allow m_initialWf to be garbage collected
 
             // Main loop
             m_currentTimeStepIndex = 0;
@@ -100,7 +101,7 @@ namespace TdseSolver_2D1P
                 if ( m_isTimeDependentV && (m_currentTimeStepIndex > 0) ) { V = PrecomputeV(m_currentTimeStepIndex*m_deltaT); }
 
                 // Evolve the wavefunction by one timestep
-                EvolveByOneTimeStep(m_visscherWf, V, m_deltaT, m_multiThread);
+                EvolveByOneTimeStep(m_visscherWf, V);
                 m_currentTimeStepIndex++;
 
                 // Report progress to the caller
@@ -119,22 +120,29 @@ namespace TdseSolver_2D1P
         /// </summary>
         private float[][] PrecomputeV(float time)
         {
-            int nx = m_intialWf.GridSizeX;
-            int ny = m_intialWf.GridSizeY;
-
-            float[][] V = new float[nx][];
-            for (int i = 0; i < nx; i++) { V[i] = new float[ny]; }
+            int sx = m_intialWf.GridSizeX;
+            int sy = m_intialWf.GridSizeY;
+            float[][] V = TdseUtils.Misc.Allocate2DArray(sy, sx);
 
             float a = m_intialWf.LatticeSpacing;
-            float domainSizeX = nx * a;
-            float domainSizeY = ny * a;
+            float domainSizeX = sx * a;
+            float domainSizeY = sy * a;
 
-            for (int x = 0; x < nx; x++)
+            TdseUtils.Misc.LoopDelegate YLoop = (y) =>
             {
-                for (int y = 0; y < ny; y++)
+                float[] Vy = V[y];
+                for (int x = 0; x < sx; x++)
                 {
-                    V[x][y] = m_potential(x*a, y*a, time, m_particleMass, domainSizeX, domainSizeY);
+                    Vy[x] = m_potential(x*a, y*a, time, m_particleMass, domainSizeX, domainSizeY);
                 }
+            };
+            if (m_multiThread)
+            {
+                Parallel.For(0, sy, y => { YLoop(y); });
+            }
+            else
+            {
+                for (int y = 0; y < sy; y++) { YLoop(y); }
             }
 
             return V;
@@ -142,69 +150,63 @@ namespace TdseSolver_2D1P
 
 
 
-        // Declare a worker delegate needed by the following method
-        private delegate void LoopDelegate(int x);
-
         /// <summary>
         /// Evolves the wavefunction by a single timestep
         /// </summary>
-        private void EvolveByOneTimeStep(VisscherWf wf, float[][] V, float dt, bool multiThread = true)
+        private void EvolveByOneTimeStep(VisscherWf wf, float[][] V)
         {
-            int nx = wf.GridSizeX;
-            int ny = wf.GridSizeY;
-            int nxm1 = nx - 1;
-            int nym1 = ny - 1;
-            int nxm2 = nx - 2;
-            int nym2 = ny - 2;
+            int sx = wf.GridSizeX;
+            int sy = wf.GridSizeY;
+            int sxm1 = sx - 1;
+            int sym1 = sy - 1;
             float keFactor = 1.0f / (2 * m_particleMass * wf.LatticeSpacing * wf.LatticeSpacing);
 
             float alpha = 5.0f;
             float beta  = -4.0f / 3.0f;
             float delta = 1.0f / 12.0f;
 
-
             // Compute the next real part in terms of the current imaginary part
-            LoopDelegate YLoop1 = (x) =>
+            TdseUtils.Misc.LoopDelegate YLoop1 = (y) =>
             {
-                int xp  = (x < nxm1) ? x + 1 : 0;
-                int xm  = (x > 0) ? x - 1 : nxm1;
-                int xpp = (x < nxm2) ? x + 2 : (x == nxm2) ? 0 : 1;
-                int xmm = (x > 1) ? x - 2 : (x > 0) ? nxm1 : nxm2;
+                int yp  = (y  < sym1) ?  y + 1 : 0;
+                int ypp = (yp < sym1) ? yp + 1 : 0;
+                int ym  = (y  > 0) ?  y - 1 : sym1;
+                int ymm = (ym > 0) ? ym - 1 : sym1;
 
-                float[] Vx = V[x];
-                float[] wfRx    = wf.RealPart[x];
-                float[] wfIPx   = wf.ImagPartP[x];
-                float[] wfIPxm  = wf.ImagPartP[xm];
-                float[] wfIPxp  = wf.ImagPartP[xp];
-                float[] wfIPxmm = wf.ImagPartP[xmm];
-                float[] wfIPxpp = wf.ImagPartP[xpp];
+                float[] V_y     = V[y];
+                float[] wfR_y   = wf.RealPart[y];
+                float[] wfI_y   = wf.ImagPartP[y];
+                float[] wfI_ym  = wf.ImagPartP[ym];
+                float[] wfI_yp  = wf.ImagPartP[yp];
+                float[] wfI_ymm = wf.ImagPartP[ymm];
+                float[] wfI_ypp = wf.ImagPartP[ypp];
 
-                for (int y = 0; y < ny; y++)
+                for (int x = 0; x < sx; x++)
                 {
-                    int yp = (y < nym1) ? y + 1 : 0;
-                    int ym = (y > 0) ? y - 1 : nym1;
-                    int ypp = (y < nym2) ? y + 2 : (y == nym2) ? 0 : 1;
-                    int ymm = (y > 1) ? y - 2 : (y > 0) ? nym1 : nym2;
+                    int xp  = (x  < sxm1) ?  x + 1 : 0;
+                    int xpp = (xp < sxm1) ? xp + 1 : 0;
+                    int xm  = (x  > 0) ?  x - 1 : sxm1;
+                    int xmm = (xm > 0) ? xm - 1 : sxm1;
 
-                    // This discretization of the 2nd derivative has better rotational invariance than the standard one
+                    // Discretization of the 2nd derivative that is correct to O(a^4)
                     float ke = keFactor * (
-                        alpha * wfIPx[y] +
-                        beta  * (wfIPx[ym] + wfIPx[yp] + wfIPxm[y] + wfIPxp[y]) +
-                        delta * (wfIPx[ymm] + wfIPx[ypp] + wfIPxmm[y] + wfIPxpp[y])
+                        alpha * wfI_y[x] +
+                        beta  * (wfI_y[xm] + wfI_y[xp] + wfI_ym[x] + wfI_yp[x]) +
+                        delta * (wfI_y[xmm] + wfI_y[xpp] + wfI_ymm[x] + wfI_ypp[x])
                     );
+                        
+                    float pe = V_y[x] * wfI_y[x];
 
-                    float pe = Vx[y] * wfIPx[y];
-
-                    wfRx[y] += dt * (ke + pe);
+                    wfR_y[x] += m_deltaT * (ke + pe);
                 }
             };
-            if (multiThread)
+            if (m_multiThread)
             {
-                Parallel.For(0, nx, x => { YLoop1(x); });
+                Parallel.For(0, sy, y => { YLoop1(y); });
             }
             else
             {
-                for (int x = 0; x < nx; x++) { YLoop1(x); }
+                for (int y = 0; y < sy; y++) { YLoop1(y); }
             }
 
 
@@ -213,115 +215,133 @@ namespace TdseSolver_2D1P
             wf.ImagPartM = wf.ImagPartP;
             wf.ImagPartP = temp;
 
-            // Compute the next imaginary part in terms of the current real part
-            LoopDelegate YLoop2 = (x) =>
+
+            // Compute the nezt imaginary part in terms of the current real part
+            TdseUtils.Misc.LoopDelegate YLoop2 = (y) =>
             {
-                int xp = (x < nxm1) ? x + 1 : 0;
-                int xm = (x > 0) ? x - 1 : nxm1;
-                int xpp = (x < nxm2) ? x + 2 : (x == nxm2) ? 0 : 1;
-                int xmm = (x > 1) ? x - 2 : (x > 0) ? nxm1 : nxm2;
+                int yp  = (y  < sym1) ?  y + 1 : 0;
+                int ypp = (yp < sym1) ? yp + 1 : 0;
+                int ym  = (y  > 0) ?  y - 1 : sym1;
+                int ymm = (ym > 0) ? ym - 1 : sym1;
 
-                float[] Vx = V[x];
-                float[] wfIPx  = wf.ImagPartP[x];
-                float[] wfIMx  = wf.ImagPartM[x];
-                float[] wfRx   = wf.RealPart[x];
-                float[] wfRxm  = wf.RealPart[xm];
-                float[] wfRxp  = wf.RealPart[xp];
-                float[] wfRxmm = wf.RealPart[xmm];
-                float[] wfRxpp = wf.RealPart[xpp];
+                float[] V_y      =  V[y];
+                float[] wfIM_y   =  wf.ImagPartM[y];
+                float[] wfIP_y   =  wf.ImagPartP[y];
+                float[] wfR_y    =  wf.RealPart[y];
+                float[] wfR_ym   =  wf.RealPart[ym];
+                float[] wfR_yp   =  wf.RealPart[yp];
+                float[] wfR_ymm  =  wf.RealPart[ymm];
+                float[] wfR_ypp  =  wf.RealPart[ypp];
 
-                for (int y = 0; y < ny; y++)
+                for (int x = 0; x < sx; x++)
                 {
-                    int yp = (y < nym1) ? y + 1 : 0;
-                    int ym = (y > 0) ? y - 1 : nym1;
-                    int ypp = (y < nym2) ? y + 2 : (y == nym2) ? 0 : 1;
-                    int ymm = (y > 1) ? y - 2 : (y > 0) ? nym1 : nym2;
+                    int xp  = (x  < sxm1) ?  x + 1 : 0;
+                    int xpp = (xp < sxm1) ? xp + 1 : 0;
+                    int xm  = (x  > 0) ?  x - 1 : sxm1;
+                    int xmm = (xm > 0) ? xm - 1 : sxm1;
 
-                    // This discretization of the 2nd derivative has better rotational invariance than the standard one
+                    // Discretization of the 2nd derivative that is correct to O(a^4)
                     float ke = keFactor * (
-                        alpha * wfRx[y] +
-                        beta  * (wfRx[ym] + wfRx[yp] + wfRxm[y] + wfRxp[y]) +
-                        delta * (wfRx[ymm] + wfRx[ypp] + wfRxmm[y] + wfRxpp[y])
+                        alpha * wfR_y[x] +
+                        beta  * (wfR_y[xm] + wfR_y[xp] + wfR_ym[x] + wfR_yp[x]) +
+                        delta * (wfR_y[xmm] + wfR_y[xpp] + wfR_ymm[x] + wfR_ypp[x])
                     );
 
-                    float pe = Vx[y] * wfRx[y];
+                    float pe = V_y[x] * wfR_y[x];
 
-                    wfIPx[y] = wfIMx[y] - dt * (ke + pe);
+                    wfIP_y[x] = wfIM_y[x] - m_deltaT * (ke + pe);
                 }
             };
-            if (multiThread)
+            if (m_multiThread)
             {
-                Parallel.For(0, nx, x => { YLoop2(x); });
+                Parallel.For(0, sy, y => { YLoop2(y); });
             }
             else
             {
-                for (int x = 0; x < nx; x++) { YLoop2(x); }
+                for (int y = 0; y < sy; y++) { YLoop2(y); }
             }
 
 
-            // Optionally apply the damping factor to suppress reflection and transmission at the borders. 
+            // Optionally perform damping to suppress reflection and transmission at the borders. 
             if ( (m_dampingBorderWidth > 0) && (m_dampingFactor > 0.0f) )
             {
-                int d = m_dampingBorderWidth;
-                float[] factors = new float[d];
-                for (int i=0; i<d; i++)
-                {
-                    factors[i] = (float) ( 1.0 - m_dampingFactor*dt*(1.0 - Math.Sin( ((Math.PI/2)*i)/d )) ); 
-                }
+                ApplyDamping(wf);
+            }
 
-                // Left border
+        }
+
+        /// <summary>
+        /// Damps the wavefunction apmlitude near the region boundary.
+        /// </summary>
+        private void ApplyDamping(VisscherWf wf)
+        {
+            int sx = wf.GridSizeX;
+            int sy = wf.GridSizeY;
+            int d = m_dampingBorderWidth;
+
+            float[] factors = new float[d];
+            for (int i=0; i<d; i++)
+            {
+                factors[i] = (float) ( 1.0 - m_dampingFactor*m_deltaT*(1.0 - Math.Sin( ((Math.PI/2)*i)/d )) ); 
+            }
+
+            // Top border
+            for (int y=0; y<d; y++)
+            {
+                float[] wfDataIPy = wf.ImagPartP[y];
+                float[] wfDataIMy = wf.ImagPartM[y];
+                float[] wfDataRy  = wf.RealPart[y];
+                float f = factors[y];
+ 
+                for (int x=0; x<sx; x++)
+                {
+                    wfDataRy[x]  *= f;
+                    wfDataIPy[x] *= f;
+                    wfDataIMy[x] *= f;
+                }
+            }
+
+            // Bottom border
+            for (int y=sy-d; y<sy; y++)
+            {
+                float[] wfDataIPy = wf.ImagPartP[y];
+                float[] wfDataIMy = wf.ImagPartM[y];
+                float[] wfDataRy  = wf.RealPart[y];
+                float f = factors[sy-1-y];
+
+                for (int x=0; x<sx; x++)
+                {
+                    wfDataRy[x]  *= f;
+                    wfDataIPy[x] *= f;
+                    wfDataIMy[x] *= f;
+                }
+            }
+
+            // Left and right borders
+            for (int y=0; y<sy; y++)
+            {
+                float[] wfDataIPy = wf.ImagPartP[y];
+                float[] wfDataIMy = wf.ImagPartM[y];
+                float[] wfDataRy  = wf.RealPart[y];
+
                 for (int x=0; x<d; x++)
                 {
-                    float[] wfDataIxP = wf.ImagPartP[x];
-                    float[] wfDataIxM = wf.ImagPartM[x];
-                    float[] wfDataRx  = wf.RealPart[x];
-
-                    for (int y=0; y<ny; y++)
-                    {
-                        wfDataRx[y]  *= factors[x];
-                        wfDataIxP[y] *= factors[x];
-                        wfDataIxM[y] *= factors[x];
-                    }
+                    float f = factors[x];
+                    wfDataRy[x]  *= f;
+                    wfDataIPy[x] *= f;
+                    wfDataIMy[x] *= f;
                 }
-
-                // Right border
-                for (int x=nx-d; x<nx; x++)
+                for (int x=sx-d; x<sx; x++)
                 {
-                    float[] wfDataIxP = wf.ImagPartP[x];
-                    float[] wfDataIxM = wf.ImagPartM[x];
-                    float[] wfDataRx  = wf.RealPart[x];
-
-                    for (int y=0; y<ny; y++)
-                    {
-                        wfDataRx[y]  *= factors[nx-1-x];
-                        wfDataIxP[y] *= factors[nx-1-x];
-                        wfDataIxM[y] *= factors[nx-1-x];
-                    }
+                    float f = factors[sx-1-x];
+                    wfDataRy[x]  *= f;
+                    wfDataIPy[x] *= f;
+                    wfDataIMy[x] *= f;
                 }
-
-                // Top and bottom borders
-                for (int x=0; x<nx; x++)
-                {
-                    float[] wfDataIxP = wf.ImagPartP[x];
-                    float[] wfDataIxM = wf.ImagPartM[x];
-                    float[] wfDataRx  = wf.RealPart[x];
-
-                    for (int y=0; y<d; y++)
-                    {
-                        wfDataRx[y]  *= factors[y];
-                        wfDataIxP[y] *= factors[y];
-                        wfDataIxM[y] *= factors[y];
-                    }
-                    for (int y=ny-d; y<ny; y++)
-                    {
-                        wfDataRx[y]  *= factors[ny-1-y];
-                        wfDataIxP[y] *= factors[ny-1-y];
-                        wfDataIxM[y] *= factors[ny-1-y];
-                    }
-                }
-
             }
+
         }
+        
         
     
     }

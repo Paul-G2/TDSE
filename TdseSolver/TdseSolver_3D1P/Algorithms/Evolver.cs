@@ -115,9 +115,6 @@ namespace TdseSolver_3D1P
 
         }
 
-
-        // Declare a worker delegate needed by the following methods
-        private delegate void LoopDelegate(int x);
    
         /// <summary>
         /// Computes the potential at all grid locations. 
@@ -134,7 +131,7 @@ namespace TdseSolver_3D1P
             float domainSizeY = sy * a;
             float domainSizeZ = sz * a;
 
-            LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
             {
                 for (int y = 0; y < sy; y++)
                 {
@@ -176,7 +173,7 @@ namespace TdseSolver_3D1P
 
 
             // Compute the next real part in terms of the current imaginary part
-            LoopDelegate ZLoop1 = (z) =>
+            TdseUtils.Misc.LoopDelegate ZLoop1 = (z) =>
             {
                 int zp  = (z  < szm1) ?  z + 1 : 0;
                 int zpp = (zp < szm1) ? zp + 1 : 0;
@@ -239,7 +236,7 @@ namespace TdseSolver_3D1P
 
 
             // Compute the nezt imaginary part in terms of the current real part
-            LoopDelegate ZLoop2 = (z) =>
+            TdseUtils.Misc.LoopDelegate ZLoop2 = (z) =>
             {
                 int zp  = (z  < szm1) ?  z + 1 : 0;
                 int zpp = (zp < szm1) ? zp + 1 : 0;

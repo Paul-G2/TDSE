@@ -51,7 +51,7 @@ namespace TdseSolver_3D1P
         /// <summary>
         /// Gets the wavefunction amplitude at a given location.
         /// </summary>
-        public float Ampl(int z, int y, int x)
+        public float Ampl(int x, int y, int z)
         {
             float[] dataZY = m_data[z][y];
             float re = dataZY[2*x];
@@ -64,7 +64,7 @@ namespace TdseSolver_3D1P
         /// <summary>
         /// Gets the squared wavefunction amplitude at a given location.
         /// </summary>
-        public float Prob(int z, int y, int x)
+        public float Prob(int x, int y, int z)
         {
             float[] dataZY = m_data[z][y];
             float re = dataZY[2*x];
@@ -77,7 +77,7 @@ namespace TdseSolver_3D1P
         /// <summary>
         /// Gets the phase angle at a given location. (Range is -Pi to Pi).
         /// </summary>
-        public float Phase(int z, int y, int x)
+        public float Phase(int x, int y, int z)
         {
             float[] dataZY = m_data[z][y];
 
@@ -118,15 +118,15 @@ namespace TdseSolver_3D1P
         /// </summary>
         public float NormSq()
         {
-            float normSq = 0.0f;
-
             int sx = GridSpec.SizeX;
             int sy = GridSpec.SizeY;
             int sz = GridSpec.SizeZ;
             int sx2 = 2*sx;
-
+            float[] normSq = new float[sz];
+            
             Parallel.For(0, sz, z =>
             {
+                float xySum = 0.0f;
                 for (int y = 0; y < sy; y++)
                 {
                     float[] dataZY = m_data[z][y];
@@ -134,13 +134,17 @@ namespace TdseSolver_3D1P
                     for (int nx = 0; nx < sx2; nx++)
                     {
                         float val = dataZY[nx];
-                        normSq += val*val;
+                        xySum += val*val;
                     }            
                 }
+                normSq[z] = xySum;
             });
 
-            normSq *= (m_latticeSpacing*m_latticeSpacing*m_latticeSpacing);
-            return normSq;
+            float normSqTot = 0.0f;
+            for (int z=0; z<sz; z++) { normSqTot += normSq[z]; }
+            normSqTot *= (m_latticeSpacing*m_latticeSpacing*m_latticeSpacing);
+
+            return normSqTot;
         }
 
 
@@ -177,9 +181,6 @@ namespace TdseSolver_3D1P
             });
         }
 
-        
-        // Worker delegate needed by the following method
-        private delegate void LoopDelegate(int x);
 
         /// <summary>
         /// Computes the result of applying a given Hamiltonian operator to this wavefunction.
@@ -202,7 +203,7 @@ namespace TdseSolver_3D1P
 
 
             // Compute H * Wf
-            LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
             {
                 int zp  = (z  < szm1) ?  z + 1 : 0;
                 int zpp = (zp < szm1) ? zp + 1 : 0;

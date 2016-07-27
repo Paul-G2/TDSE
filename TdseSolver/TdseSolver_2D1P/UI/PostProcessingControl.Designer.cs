@@ -34,25 +34,31 @@
             this.Main_ProgressBar = new System.Windows.Forms.ProgressBar();
             this.ReColor_Btn = new System.Windows.Forms.Button();
             this.groupBox8 = new System.Windows.Forms.GroupBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.label1 = new System.Windows.Forms.Label();
             this.Crop_Btn = new System.Windows.Forms.Button();
             this.label12 = new System.Windows.Forms.Label();
-            this.LeftCrop_NUD = new System.Windows.Forms.NumericUpDown();
-            this.BottomCrop_NUD = new System.Windows.Forms.NumericUpDown();
-            this.TopCrop_NUD = new System.Windows.Forms.NumericUpDown();
-            this.RightCrop_NUD = new System.Windows.Forms.NumericUpDown();
+            this.XCrop1_NUD = new System.Windows.Forms.NumericUpDown();
+            this.YCrop2_NUD = new System.Windows.Forms.NumericUpDown();
+            this.YCrop1_NUD = new System.Windows.Forms.NumericUpDown();
+            this.XCrop2_NUD = new System.Windows.Forms.NumericUpDown();
             this.UpsampleFactor_NUD = new System.Windows.Forms.NumericUpDown();
             this.Upsample_Btn = new System.Windows.Forms.Button();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.InputDir_TextBox = new System.Windows.Forms.TextBox();
             this.SelectFolder_Btn = new System.Windows.Forms.Button();
+            this.label4 = new System.Windows.Forms.Label();
+            this.SmoothingFactor_NUD = new System.Windows.Forms.NumericUpDown();
+            this.Smooth_Btn = new System.Windows.Forms.Button();
             this.groupBox10.SuspendLayout();
             this.groupBox8.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.LeftCrop_NUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.BottomCrop_NUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TopCrop_NUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RightCrop_NUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.XCrop1_NUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.YCrop2_NUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.YCrop1_NUD)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.XCrop2_NUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.UpsampleFactor_NUD)).BeginInit();
             this.groupBox7.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SmoothingFactor_NUD)).BeginInit();
             this.SuspendLayout();
             // 
             // groupBox10
@@ -101,9 +107,9 @@
             // 
             // ReColor_Btn
             // 
-            this.ReColor_Btn.Location = new System.Drawing.Point(399, 30);
+            this.ReColor_Btn.Location = new System.Drawing.Point(417, 30);
             this.ReColor_Btn.Name = "ReColor_Btn";
-            this.ReColor_Btn.Size = new System.Drawing.Size(110, 38);
+            this.ReColor_Btn.Size = new System.Drawing.Size(92, 38);
             this.ReColor_Btn.TabIndex = 0;
             this.ReColor_Btn.Text = "Re-Color ...";
             this.ReColor_Btn.UseVisualStyleBackColor = true;
@@ -111,13 +117,18 @@
             // 
             // groupBox8
             // 
+            this.groupBox8.Controls.Add(this.label4);
+            this.groupBox8.Controls.Add(this.SmoothingFactor_NUD);
+            this.groupBox8.Controls.Add(this.Smooth_Btn);
+            this.groupBox8.Controls.Add(this.label2);
+            this.groupBox8.Controls.Add(this.label1);
             this.groupBox8.Controls.Add(this.Crop_Btn);
             this.groupBox8.Controls.Add(this.ReColor_Btn);
             this.groupBox8.Controls.Add(this.label12);
-            this.groupBox8.Controls.Add(this.LeftCrop_NUD);
-            this.groupBox8.Controls.Add(this.BottomCrop_NUD);
-            this.groupBox8.Controls.Add(this.TopCrop_NUD);
-            this.groupBox8.Controls.Add(this.RightCrop_NUD);
+            this.groupBox8.Controls.Add(this.XCrop1_NUD);
+            this.groupBox8.Controls.Add(this.YCrop2_NUD);
+            this.groupBox8.Controls.Add(this.YCrop1_NUD);
+            this.groupBox8.Controls.Add(this.XCrop2_NUD);
             this.groupBox8.Controls.Add(this.UpsampleFactor_NUD);
             this.groupBox8.Controls.Add(this.Upsample_Btn);
             this.groupBox8.Location = new System.Drawing.Point(0, 124);
@@ -126,11 +137,29 @@
             this.groupBox8.TabIndex = 14;
             this.groupBox8.TabStop = false;
             // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(348, 137);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(14, 13);
+            this.label2.TabIndex = 4;
+            this.label2.Text = "Y";
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(295, 137);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(14, 13);
+            this.label1.TabIndex = 3;
+            this.label1.Text = "X";
+            // 
             // Crop_Btn
             // 
-            this.Crop_Btn.Location = new System.Drawing.Point(209, 30);
+            this.Crop_Btn.Location = new System.Drawing.Point(279, 30);
             this.Crop_Btn.Name = "Crop_Btn";
-            this.Crop_Btn.Size = new System.Drawing.Size(114, 38);
+            this.Crop_Btn.Size = new System.Drawing.Size(103, 38);
             this.Crop_Btn.TabIndex = 0;
             this.Crop_Btn.Text = "Crop";
             this.Crop_Btn.UseVisualStyleBackColor = true;
@@ -145,94 +174,93 @@
             this.label12.TabIndex = 2;
             this.label12.Text = "Factor :";
             // 
-            // LeftCrop_NUD
+            // XCrop1_NUD
             // 
-            this.LeftCrop_NUD.Increment = new decimal(new int[] {
+            this.XCrop1_NUD.Increment = new decimal(new int[] {
             100,
             0,
             0,
             0});
-            this.LeftCrop_NUD.Location = new System.Drawing.Point(201, 118);
-            this.LeftCrop_NUD.Maximum = new decimal(new int[] {
+            this.XCrop1_NUD.Location = new System.Drawing.Point(279, 81);
+            this.XCrop1_NUD.Maximum = new decimal(new int[] {
             9999,
             0,
             0,
             0});
-            this.LeftCrop_NUD.Name = "LeftCrop_NUD";
-            this.LeftCrop_NUD.Size = new System.Drawing.Size(54, 20);
-            this.LeftCrop_NUD.TabIndex = 1;
-            this.LeftCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.LeftCrop_NUD.UpDownAlign = System.Windows.Forms.LeftRightAlignment.Left;
-            this.LeftCrop_NUD.Value = new decimal(new int[] {
+            this.XCrop1_NUD.Name = "XCrop1_NUD";
+            this.XCrop1_NUD.Size = new System.Drawing.Size(47, 20);
+            this.XCrop1_NUD.TabIndex = 1;
+            this.XCrop1_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.XCrop1_NUD.Value = new decimal(new int[] {
             1024,
             0,
             0,
             0});
             // 
-            // BottomCrop_NUD
+            // YCrop2_NUD
             // 
-            this.BottomCrop_NUD.Increment = new decimal(new int[] {
+            this.YCrop2_NUD.Increment = new decimal(new int[] {
             100,
             0,
             0,
             0});
-            this.BottomCrop_NUD.Location = new System.Drawing.Point(241, 152);
-            this.BottomCrop_NUD.Maximum = new decimal(new int[] {
+            this.YCrop2_NUD.Location = new System.Drawing.Point(335, 110);
+            this.YCrop2_NUD.Maximum = new decimal(new int[] {
             9999,
             0,
             0,
             0});
-            this.BottomCrop_NUD.Name = "BottomCrop_NUD";
-            this.BottomCrop_NUD.Size = new System.Drawing.Size(54, 20);
-            this.BottomCrop_NUD.TabIndex = 1;
-            this.BottomCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.BottomCrop_NUD.Value = new decimal(new int[] {
+            this.YCrop2_NUD.Name = "YCrop2_NUD";
+            this.YCrop2_NUD.Size = new System.Drawing.Size(46, 20);
+            this.YCrop2_NUD.TabIndex = 1;
+            this.YCrop2_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.YCrop2_NUD.Value = new decimal(new int[] {
             1024,
             0,
             0,
             0});
             // 
-            // TopCrop_NUD
+            // YCrop1_NUD
             // 
-            this.TopCrop_NUD.Increment = new decimal(new int[] {
+            this.YCrop1_NUD.Increment = new decimal(new int[] {
             100,
             0,
             0,
             0});
-            this.TopCrop_NUD.Location = new System.Drawing.Point(241, 86);
-            this.TopCrop_NUD.Maximum = new decimal(new int[] {
+            this.YCrop1_NUD.Location = new System.Drawing.Point(335, 81);
+            this.YCrop1_NUD.Maximum = new decimal(new int[] {
             9999,
             0,
             0,
             0});
-            this.TopCrop_NUD.Name = "TopCrop_NUD";
-            this.TopCrop_NUD.Size = new System.Drawing.Size(54, 20);
-            this.TopCrop_NUD.TabIndex = 1;
-            this.TopCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.TopCrop_NUD.Value = new decimal(new int[] {
+            this.YCrop1_NUD.Name = "YCrop1_NUD";
+            this.YCrop1_NUD.Size = new System.Drawing.Size(47, 20);
+            this.YCrop1_NUD.TabIndex = 1;
+            this.YCrop1_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.YCrop1_NUD.Value = new decimal(new int[] {
             1024,
             0,
             0,
             0});
             // 
-            // RightCrop_NUD
+            // XCrop2_NUD
             // 
-            this.RightCrop_NUD.Increment = new decimal(new int[] {
+            this.XCrop2_NUD.Increment = new decimal(new int[] {
             100,
             0,
             0,
             0});
-            this.RightCrop_NUD.Location = new System.Drawing.Point(277, 118);
-            this.RightCrop_NUD.Maximum = new decimal(new int[] {
+            this.XCrop2_NUD.Location = new System.Drawing.Point(279, 110);
+            this.XCrop2_NUD.Maximum = new decimal(new int[] {
             9999,
             0,
             0,
             0});
-            this.RightCrop_NUD.Name = "RightCrop_NUD";
-            this.RightCrop_NUD.Size = new System.Drawing.Size(54, 20);
-            this.RightCrop_NUD.TabIndex = 1;
-            this.RightCrop_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.RightCrop_NUD.Value = new decimal(new int[] {
+            this.XCrop2_NUD.Name = "XCrop2_NUD";
+            this.XCrop2_NUD.Size = new System.Drawing.Size(47, 20);
+            this.XCrop2_NUD.TabIndex = 1;
+            this.XCrop2_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.XCrop2_NUD.Value = new decimal(new int[] {
             1024,
             0,
             0,
@@ -248,7 +276,7 @@
             0,
             0});
             this.UpsampleFactor_NUD.Name = "UpsampleFactor_NUD";
-            this.UpsampleFactor_NUD.Size = new System.Drawing.Size(66, 20);
+            this.UpsampleFactor_NUD.Size = new System.Drawing.Size(54, 20);
             this.UpsampleFactor_NUD.TabIndex = 1;
             this.UpsampleFactor_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.UpsampleFactor_NUD.Value = new decimal(new int[] {
@@ -261,7 +289,7 @@
             // 
             this.Upsample_Btn.Location = new System.Drawing.Point(19, 30);
             this.Upsample_Btn.Name = "Upsample_Btn";
-            this.Upsample_Btn.Size = new System.Drawing.Size(110, 38);
+            this.Upsample_Btn.Size = new System.Drawing.Size(95, 38);
             this.Upsample_Btn.TabIndex = 0;
             this.Upsample_Btn.Text = "Upsample";
             this.Upsample_Btn.UseVisualStyleBackColor = true;
@@ -282,7 +310,6 @@
             this.InputDir_TextBox.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.InputDir_TextBox.Enabled = false;
             this.InputDir_TextBox.Location = new System.Drawing.Point(144, 42);
             this.InputDir_TextBox.Name = "InputDir_TextBox";
             this.InputDir_TextBox.Size = new System.Drawing.Size(365, 20);
@@ -298,6 +325,44 @@
             this.SelectFolder_Btn.UseVisualStyleBackColor = true;
             this.SelectFolder_Btn.Click += new System.EventHandler(this.SelectFolder_Btn_Click);
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(145, 81);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(40, 13);
+            this.label4.TabIndex = 9;
+            this.label4.Text = "Scale :";
+            // 
+            // SmoothingFactor_NUD
+            // 
+            this.SmoothingFactor_NUD.DecimalPlaces = 1;
+            this.SmoothingFactor_NUD.Location = new System.Drawing.Point(189, 79);
+            this.SmoothingFactor_NUD.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.SmoothingFactor_NUD.Name = "SmoothingFactor_NUD";
+            this.SmoothingFactor_NUD.Size = new System.Drawing.Size(50, 20);
+            this.SmoothingFactor_NUD.TabIndex = 8;
+            this.SmoothingFactor_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.SmoothingFactor_NUD.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            // 
+            // Smooth_Btn
+            // 
+            this.Smooth_Btn.Location = new System.Drawing.Point(148, 30);
+            this.Smooth_Btn.Name = "Smooth_Btn";
+            this.Smooth_Btn.Size = new System.Drawing.Size(94, 38);
+            this.Smooth_Btn.TabIndex = 7;
+            this.Smooth_Btn.Text = "Smooth";
+            this.Smooth_Btn.UseVisualStyleBackColor = true;
+            this.Smooth_Btn.Click += new System.EventHandler(this.Smooth_Btn_Click);
+            // 
             // PostProcessingControl
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -310,13 +375,14 @@
             this.groupBox10.ResumeLayout(false);
             this.groupBox8.ResumeLayout(false);
             this.groupBox8.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.LeftCrop_NUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.BottomCrop_NUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TopCrop_NUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RightCrop_NUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.XCrop1_NUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.YCrop2_NUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.YCrop1_NUD)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.XCrop2_NUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.UpsampleFactor_NUD)).EndInit();
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SmoothingFactor_NUD)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -336,9 +402,14 @@
         private System.Windows.Forms.TextBox InputDir_TextBox;
         private System.Windows.Forms.Button SelectFolder_Btn;
         private System.Windows.Forms.Button Crop_Btn;
-        private System.Windows.Forms.NumericUpDown LeftCrop_NUD;
-        private System.Windows.Forms.NumericUpDown RightCrop_NUD;
-        private System.Windows.Forms.NumericUpDown BottomCrop_NUD;
-        private System.Windows.Forms.NumericUpDown TopCrop_NUD;
+        private System.Windows.Forms.NumericUpDown XCrop1_NUD;
+        private System.Windows.Forms.NumericUpDown XCrop2_NUD;
+        private System.Windows.Forms.NumericUpDown YCrop2_NUD;
+        private System.Windows.Forms.NumericUpDown YCrop1_NUD;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.NumericUpDown SmoothingFactor_NUD;
+        private System.Windows.Forms.Button Smooth_Btn;
     }
 }

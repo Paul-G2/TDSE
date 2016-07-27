@@ -38,6 +38,8 @@ namespace TdseSolver_2D1P
 
         public WaveFunction.WfSaveFormat SaveFormat   = WaveFunction.WfSaveFormat.REAL_AND_IMAG;
 
+        public string  VCode                          = "";
+
 
 
 
@@ -66,6 +68,7 @@ namespace TdseSolver_2D1P
             sb.Append("NumFramesToSave: "            + NumFramesToSave.ToString()             + nl);
             sb.Append("MultiThread: "                + MultiThread.ToString()                 + nl);
             sb.Append("SaveFormat: "                 + SaveFormat.ToString()                  + nl);
+            sb.Append("\n\n\n\n"                     + VCode                                  + nl);
 
             return sb.ToString();
         }
@@ -79,8 +82,12 @@ namespace TdseSolver_2D1P
             RunParams result = new RunParams();
 
             string[] lines = stringRep.Split(new string[] { "\r\n", "\n" }, StringSplitOptions.None);
-            foreach (string line in lines)
+
+            int numLines = lines.Length;
+            for ( int lineIndex = 0; lineIndex < numLines; lineIndex++ )
             {
+                string line = lines[lineIndex];
+
                 if (line.Contains("GridSizeX"))
                 {
                     result.GridSizeX = int.Parse(line.Split(':')[1]);
@@ -151,7 +158,10 @@ namespace TdseSolver_2D1P
                 }
                 else if ( !string.IsNullOrEmpty(line) )
                 {
-                    break;
+                    for (; lineIndex<numLines; lineIndex++)
+                    {
+                        result.VCode += lines[lineIndex] + "\n";
+                    }
                 }
             }
 

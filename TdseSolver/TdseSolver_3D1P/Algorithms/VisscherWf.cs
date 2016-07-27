@@ -58,7 +58,7 @@ namespace TdseSolver_3D1P
             float halfDt = dt/2;
             float eighthDt2 = dt*dt/8;
 
-            LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
             {
                 for (int y = 0; y < sy; y++)
                 {
@@ -120,7 +120,7 @@ namespace TdseSolver_3D1P
 
             WaveFunction result = new WaveFunction(GridSpec, LatticeSpacing);
 
-            LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
             {
                 for (int y = 0; y < sy; y++)
                 {
@@ -165,8 +165,5 @@ namespace TdseSolver_3D1P
             return result;
         }
 
-
-        // Declare a worker delegate needed by some methods
-        private delegate void LoopDelegate(int x);
     }
 }

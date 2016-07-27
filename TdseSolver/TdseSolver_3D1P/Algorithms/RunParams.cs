@@ -71,7 +71,7 @@ namespace TdseSolver_3D1P
             sb.Append("NumFramesToSave: "            + NumFramesToSave.ToString()             + nl);
             sb.Append("MultiThread: "                + MultiThread.ToString()                 + nl);
             sb.Append("SaveFormat: "                 + SaveFormat.ToString()                  + nl);
-            sb.Append("\n\n\n\n"                     + VCode                                 + nl);
+            sb.Append("\n\n\n\n"                     + VCode                                  + nl);
 
             return sb.ToString();
         }

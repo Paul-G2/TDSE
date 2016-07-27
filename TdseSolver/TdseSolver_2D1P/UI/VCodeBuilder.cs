@@ -26,29 +26,64 @@ namespace TdseSolver_2D1P
 
 
         /// <summary>
-        /// Computes the potential energy at a given location and time, using the function defined in the current code snippet.
-        /// </summary>
-        public float V(float x, float y, float t, float mass, float domainSizeX, float domainSizeY)
-        {
-            return (float) m_vCalcMethodInfo.Invoke( null, new object[]{x, y, t, mass, domainSizeX, domainSizeY} );
-        }
-
-
-        /// <summary>
-        /// Gets the V-code that was last compiled and saved.
-        /// </summary>
-        public string GetLastSavedCode()
-        {
-            return Properties.Settings.Default.VCode;
-        }
-
-
-        /// <summary>
         /// Handler for form-shown events.
         /// </summary>
         private void VBuilder_Shown(object sender, EventArgs e)
         {
             LoadLastSavedCode();
+        }
+
+        
+        /// <summary>
+        /// Loads the last-saved code.
+        /// </summary>
+        private void LoadLastSavedCode()
+        {
+            string errorMessages = SetCode( RunParams.FromString(Properties.Settings.Default.LastRunParams).VCode );
+
+            if ( !string.IsNullOrEmpty(errorMessages) )
+            {
+                SetCode( DefaultSnippet );
+            }
+        }
+        
+        
+
+        /// <summary>
+        /// Sets and saves the V-code.
+        /// </summary>
+        public string SetCode(string code)
+        {
+            // Try to compile the given code
+            string errorMessages;
+            Assembly assembly = CompileCode( AddBoilerplateCode(code), out errorMessages );
+
+            // Check for compilation errors
+            if ( assembly == null )
+            {
+                return string.IsNullOrEmpty(errorMessages) ? "Unknown compilation error." : errorMessages;
+            }
+            else
+            {
+                // Accept the given code
+                Code_TextBox.Text = code;
+                m_vCalcMethodInfo = assembly.GetTypes()[0].GetMethod("V", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+
+                RunParams parms = RunParams.FromString(Properties.Settings.Default.LastRunParams);
+                parms.VCode = code;
+                Properties.Settings.Default.LastRunParams = parms.ToString();
+                Properties.Settings.Default.Save();
+                return "";
+            }
+        }
+        
+        
+        /// <summary>
+        /// Computes the potential energy at a given location and time, using the function defined in the current code snippet.
+        /// </summary>
+        public float V(float x, float y, float t, float mass, float domainSizeX, float domainSizeY)
+        {
+            return (float) m_vCalcMethodInfo.Invoke( null, new object[]{x, y, t, mass, domainSizeX, domainSizeY} );
         }
 
 
@@ -79,49 +114,19 @@ namespace TdseSolver_2D1P
         /// </summary>
         private void Accept_Btn_Click(object sender, EventArgs e)
         {
-            // Try to compile the current code
-            string errorMessages;
-            Assembly assembly = CompileCode( AddBoilerplateCode(Code_TextBox.Text), out errorMessages );
+            string errorMessages = SetCode(Code_TextBox.Text);
 
-            // Check for compilation errors
-            if ( assembly == null )
+            if ( string.IsNullOrEmpty(errorMessages) )
             {
-                string msg = string.IsNullOrEmpty(errorMessages) ? "Unknown error." : errorMessages;
-                new TdseUtils.NonModalMessageBox(msg, "Compiler Errors").Show(this);
-                return;
+                this.Close();
             }
             else
             {
-                // Accept the current code and close this dialog
-                Properties.Settings.Default.VCode = Code_TextBox.Text;
-                Properties.Settings.Default.Save();
-                m_vCalcMethodInfo = assembly.GetTypes()[0].GetMethod("V", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-                this.Close();
+                new TdseUtils.NonModalMessageBox(errorMessages, "Compiler Errors").Show(this);
+                return;
             }
-
         }
 
-
-        /// <summary>
-        /// Loads the last-saved code.
-        /// </summary>
-        private void LoadLastSavedCode()
-        {
-            // Populate the code area with the last-saved code
-            Code_TextBox.Text = string.IsNullOrEmpty(Properties.Settings.Default.VCode) ? DefaultSnippet : Properties.Settings.Default.VCode;
-
-            // Try to compile the code and extract the V method
-            string errorMessages;
-            Assembly assembly = CompileCode(AddBoilerplateCode(Code_TextBox.Text), out errorMessages);
-            if (assembly == null)
-            {
-                Code_TextBox.Text = DefaultSnippet;
-                Properties.Settings.Default.VCode = DefaultSnippet;
-                Properties.Settings.Default.Save();
-                assembly = CompileCode(AddBoilerplateCode(Code_TextBox.Text), out errorMessages);
-            }
-            m_vCalcMethodInfo = assembly.GetTypes()[0].GetMethod("V", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
-        }
 
         
         /// <summary>
@@ -146,8 +151,23 @@ namespace TdseSolver_2D1P
                     errorMessages += err.ErrorNumber + ":   " + err.ErrorText + "  (line " + (err.Line-7).ToString() + ", column " + err.Column.ToString() + ")";
                 }
             }
+            if ( cr.Errors.HasErrors || (cr.CompiledAssembly == null) )
+            {
+                return null;
+            }
 
-            return (cr.Errors.HasErrors) ? null : cr.CompiledAssembly;
+
+            // Check that the V method had been defined
+            MethodInfo vMethodInfo = cr.CompiledAssembly.GetTypes()[0].GetMethod("V", System.Reflection.BindingFlags.Static | System.Reflection.BindingFlags.Public);
+            if (vMethodInfo == null)
+            {
+                errorMessages = "Expected V method not found.";
+                return null;
+            }
+            else
+            {
+                return cr.CompiledAssembly;
+            }
         }
 
 
@@ -244,7 +264,7 @@ namespace TdseSolver_2D1P
                     "    double dy = y - domainSizeY/2;                                                                  \n" +
                     "    double dist = Math.Sqrt(dx*dx + dy*dy);                                                         \n" +
                     "                                                                                                    \n" +
-                    "    return (dist > R) ? 0.0f : 2.0f;                                                                \n" +
+                    "    return (dist > R) ? 0.0f : 1.0f;                                                                                            \n" +
                     "}                                                                                                   \n";
             }
         }
@@ -278,7 +298,7 @@ namespace TdseSolver_2D1P
                     "        double d = Math.Abs(x-y);                                                                   \n" +
                     "        if ( (d > HoleSeparation + HoleWidth/2) || (d < HoleSeparation-HoleWidth/2) )               \n" +
                     "        {                                                                                           \n" +
-                    "            result = 2.0f;                                                                          \n" +
+                    "            result = 1.0f;                                                                                                      \n" +
                     "        }                                                                                           \n" +
                     "    }                                                                                               \n" +
                     "                                                                                                    \n" +

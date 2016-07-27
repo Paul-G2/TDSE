@@ -106,5 +106,17 @@ namespace TdseSolver_2D1P.Properties {
                 this["UpsampleFactor"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("1")]
+        public float SmoothingFactor {
+            get {
+                return ((float)(this["SmoothingFactor"]));
+            }
+            set {
+                this["SmoothingFactor"] = value;
+            }
+        }
     }
 }

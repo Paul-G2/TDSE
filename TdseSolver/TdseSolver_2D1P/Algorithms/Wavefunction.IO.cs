@@ -14,11 +14,9 @@ namespace TdseSolver_2D1P
     {
         public enum WfSaveFormat
         {
-            AMPLITUDE_ONLY,
-            AMPLITUDE_AND_PHASE,
             REAL_AND_IMAG,
-            AMPLITUDE_AND_COLOR,
-            AMPLITUDE_PHASE_AND_COLOR
+            AMPLITUDE_ONLY,
+            AMPLITUDE_AND_COLOR
         };
 
 
@@ -31,179 +29,127 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Writes the wavefunction to a file, in VTK format.
         /// </summary>
-        public void SaveToVtkFile(string fileSpec, WfSaveFormat format=WfSaveFormat.REAL_AND_IMAG, ColorDelegate colorFunc = null)
+        public void SaveToVtkFile(string fileSpec, WfSaveFormat format, ColorDelegate colorFunc = null)
         {
-            using (FileStream fileStream = File.Create(fileSpec))
+            unsafe
             {
-                using (BinaryWriter bw = new BinaryWriter(fileStream) )
+                using (FileStream fileStream = File.Create(fileSpec))
                 {
-                    string nl = Environment.NewLine;
-                    bw.Write( Encoding.ASCII.GetBytes("# vtk DataFile Version 3.0" + nl) );
-                    bw.Write( Encoding.ASCII.GetBytes( "Wavefunction " + format.ToString() + " " + "spacing: " + m_latticeSpacing.ToString() + " " + DateTime.Now.ToString() + nl) );
-                    bw.Write( Encoding.ASCII.GetBytes("BINARY" + nl) );
-                    bw.Write( Encoding.ASCII.GetBytes("DATASET STRUCTURED_POINTS" + nl) );
-                    bw.Write( Encoding.ASCII.GetBytes("DIMENSIONS " + GridSizeX + " " + GridSizeY + " 1" + nl) );
-                    bw.Write( Encoding.ASCII.GetBytes("ORIGIN 0 0 0" + nl) );
-                    bw.Write( Encoding.ASCII.GetBytes("SPACING 1 1 1" + nl) );
-                    bw.Write( Encoding.ASCII.GetBytes("POINT_DATA " +  GridSizeX*GridSizeY + nl) );
-
-
-                    if ( format == WfSaveFormat.REAL_AND_IMAG )
+                    using (BinaryWriter bw = new BinaryWriter(fileStream))
                     {
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS real_part float" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        for (int y = 0; y < GridSizeY; y++)
+                        int sx = GridSizeX;
+                        int sy = GridSizeY;
+                        int sx2 = 2*sx;
+                        string nl = Environment.NewLine;
+
+                        // For performance, we keep a temporary float value with pointers to its bytes
+                        float floatVal = 0.0f;
+                        byte* floatBytes0 = (byte*)(&floatVal);
+                        byte* floatBytes1 = floatBytes0 + 1;
+                        byte* floatBytes2 = floatBytes0 + 2;
+                        byte* floatBytes3 = floatBytes0 + 3;
+
+                        // Write the header
+                        bw.Write(Encoding.ASCII.GetBytes("# vtk DataFile Version 3.0" + nl));
+                        bw.Write(Encoding.ASCII.GetBytes("Wavefunction2D " + format.ToString() + " " + "spacing: " + m_latticeSpacing.ToString() + nl));
+                        bw.Write(Encoding.ASCII.GetBytes("BINARY" + nl));
+                        bw.Write(Encoding.ASCII.GetBytes("DATASET STRUCTURED_POINTS" + nl));
+                        bw.Write(Encoding.ASCII.GetBytes("DIMENSIONS " + sx + " " + sy + " 1" + nl));
+                        bw.Write(Encoding.ASCII.GetBytes("ORIGIN 0 0 0" + nl));
+                        bw.Write(Encoding.ASCII.GetBytes("SPACING 1 1 1" + nl));
+                        bw.Write(Encoding.ASCII.GetBytes("POINT_DATA " +  sx*sy + nl));
+
+
+                        if (format == WfSaveFormat.REAL_AND_IMAG)
                         {
-                            for (int x = 0; x < GridSizeX; x++)
+                            // Write out the real and imaginary parts
+                            bw.Write(Encoding.ASCII.GetBytes("SCALARS wf float 2" + nl));
+                            bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
+
+                            byte[] bytePlane = new byte[sx*sy*8];
+                            int n = 0;                                
+                            for (int y = 0; y < sy; y++)
                             {
-                                byte[] bytes = BitConverter.GetBytes(m_realPart[x][y]);
-                                Array.Reverse(bytes); // VTK wants big-endian data
-                                bw.Write(bytes);
+                                float[] dataY = m_data[y];
+
+                                for (int nx = 0; nx < sx2; nx++)
+                                {
+                                    floatVal = dataY[nx];
+
+                                    bytePlane[n]   = *floatBytes3; // Reverse the bytes, since VTK wants big-endian data
+                                    bytePlane[n+1] = *floatBytes2;
+                                    bytePlane[n+2] = *floatBytes1;
+                                    bytePlane[n+3] = *floatBytes0;
+                                    n += 4;
+                                }
                             }
+                            bw.Write(bytePlane);
                         }
 
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS imag_part float" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        for (int y = 0; y < GridSizeY; y++)
+
+                        else if ((format == WfSaveFormat.AMPLITUDE_ONLY) || (format == WfSaveFormat.AMPLITUDE_AND_COLOR))
                         {
-                            for (int x = 0; x < GridSizeX; x++)
+                            // Write out the amplitudes
+                            bw.Write(Encoding.ASCII.GetBytes("SCALARS amplitude float" + nl));
+                            bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
+
+                            byte[] bytePlane = new byte[sx*sy*4];
+                            float maxAmpl = 0.0f;
+
+                            int n = 0;
+                            for (int y = 0; y < sy; y++)
                             {
-                                byte[] bytes = BitConverter.GetBytes(m_imagPart[x][y]);
-                                Array.Reverse(bytes); // VTK wants big-endian data
-                                bw.Write(bytes);
+                                float[] dataY = m_data[y];
+
+                                for (int nx = 0; nx < sx2; nx+=2)
+                                {
+                                    float re = dataY[nx];
+                                    float im = dataY[nx+1];
+                                    floatVal = (float)Math.Sqrt(re*re + im*im);
+                                    if (floatVal > maxAmpl) { maxAmpl = floatVal; }
+
+                                    bytePlane[n]   = *floatBytes3;
+                                    bytePlane[n+1] = *floatBytes2;
+                                    bytePlane[n+2] = *floatBytes1;
+                                    bytePlane[n+3] = *floatBytes0;
+                                    n += 4;
+                                }
+                            }
+                            bw.Write(bytePlane);
+                            
+
+                            // Maybe write out the colors
+                            if (format == WfSaveFormat.AMPLITUDE_AND_COLOR)
+                            {
+                                bw.Write(Encoding.ASCII.GetBytes("SCALARS colors unsigned_char 3" + nl));
+                                bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
+
+                                byte[] colorPlane = new byte[sx*sy*3];
+
+                                n = 0;
+                                for (int y = 0; y < sy; y++)
+                                {
+                                    float[] dataY = m_data[y];
+
+                                    for (int nx = 0; nx < sx2; nx+=2)
+                                    {
+                                        Color color = (colorFunc == null) ? Color.Blue : colorFunc(dataY[nx], dataY[nx+1], maxAmpl);
+
+                                        colorPlane[n]   = color.R;
+                                        colorPlane[n+1] = color.G;
+                                        colorPlane[n+2] = color.B;
+                                        n += 3;
+                                    }
+                                }
+                                bw.Write(colorPlane);
                             }
                         }
+                        else
+                        {
+                            throw new ArgumentException("Unsupported format in Wavefunction.SaveToVtkFile");
+                        }
+
                     }
-
-
-                    else if ( format == WfSaveFormat.AMPLITUDE_ONLY )
-                    {
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS amplitude float" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-
-                        for (int y = 0; y < GridSizeY; y++)
-                        {
-                            for (int x = 0; x < GridSizeX; x++)
-                            {
-                                byte[] bytes = BitConverter.GetBytes( Ampl(x,y) );
-                                Array.Reverse(bytes); // VTK wants big-endian data
-                                bw.Write(bytes);
-                            }
-                        }
-                    }
-
-                    else if ( format == WfSaveFormat.AMPLITUDE_AND_PHASE )
-                    {
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS amplitude float" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        for (int y = 0; y < GridSizeY; y++)
-                        {
-                            for (int x = 0; x < GridSizeX; x++)
-                            {
-                                byte[] bytes = BitConverter.GetBytes( Ampl(x,y) );
-                                Array.Reverse(bytes); // VTK wants big-endian data
-                                bw.Write(bytes);
-                            }
-                        }
-
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS phase float" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        for (int y = 0; y < GridSizeY; y++)
-                        {
-                            for (int x = 0; x < GridSizeX; x++)
-                            {
-                                byte[] bytes = BitConverter.GetBytes( Phase(x,y) );
-                                Array.Reverse(bytes); // VTK wants big-endian data
-                                bw.Write(bytes);
-                            }
-                        }
-                    }
-
-                    else if ( format == WfSaveFormat.AMPLITUDE_AND_COLOR )
-                    {
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS amplitude float" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        float maxAmpl = 0.0f;
-                        for (int y = 0; y < GridSizeY; y++)
-                        {
-                            for (int x = 0; x < GridSizeX; x++)
-                            {
-                                float ampl = Ampl(x,y);
-                                if (ampl > maxAmpl) { maxAmpl = ampl; }
-
-                                byte[] bytes = BitConverter.GetBytes( ampl );
-                                Array.Reverse(bytes); // VTK wants big-endian data
-                                bw.Write(bytes);
-                            }
-                        }
-
-                        // Color part
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS colors unsigned_char 3" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        for (int y = 0; y < GridSizeY; y++)
-                        {
-                            for (int x = 0; x < GridSizeX; x++)
-                            {
-                                Color color = (colorFunc == null) ? Color.Blue : colorFunc(m_realPart[x][y], m_imagPart[x][y], maxAmpl);
-
-                                bw.Write( color.R );
-                                bw.Write( color.G );
-                                bw.Write( color.B );
-                            }
-                        }
-                    }
-
-                    else if ( format == WfSaveFormat.AMPLITUDE_PHASE_AND_COLOR )
-                    {
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS amplitude float" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        float maxAmpl = 0.0f;
-                        for (int y = 0; y < GridSizeY; y++)
-                        {
-                            for (int x = 0; x < GridSizeX; x++)
-                            {
-                                float ampl = Ampl(x,y);
-                                if (ampl > maxAmpl) { maxAmpl = ampl; }
-
-                                byte[] bytes = BitConverter.GetBytes( ampl );
-                                Array.Reverse(bytes); // VTK wants big-endian data
-                                bw.Write(bytes);
-                            }
-                        }
-
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS phase float" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        for (int y = 0; y < GridSizeY; y++)
-                        {
-                            for (int x = 0; x < GridSizeX; x++)
-                            {
-                                byte[] bytes = BitConverter.GetBytes( Phase(x,y) );
-                                Array.Reverse(bytes); // VTK wants big-endian data
-                                bw.Write(bytes);
-                            }
-                        }
-
-                        // Color part
-                        bw.Write(Encoding.ASCII.GetBytes("SCALARS colors unsigned_char 3" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
-                        for (int y = 0; y < GridSizeY; y++)
-                        {
-                            for (int x = 0; x < GridSizeX; x++)
-                            {
-                                Color color = (colorFunc == null) ? Color.Blue : colorFunc(m_realPart[x][y], m_imagPart[x][y], maxAmpl);
-
-                                bw.Write( color.R );
-                                bw.Write( color.G );
-                                bw.Write( color.B );
-                            }
-                        }
-                    }
-
-                    else
-                    {
-                        throw new ArgumentException("Unsupported format in Wavefunction.SaveToVtkFile");
-                    }
-
                 }
             }
         }
@@ -215,10 +161,9 @@ namespace TdseSolver_2D1P
         /// </summary>
         public static WaveFunction ReadFromVtkFile(string fileSpec)
         {
-            int gridSizeX = -1;
-            int gridSizeY = -1;
-            float[][] realPart = null;
-            float[][] imagPart = null;
+            int sx = -1;
+            int sy = -1;
+            float[][] wfData = null;
             string format = "";
             float latticeSpacing = 0.0f;
 
@@ -229,7 +174,7 @@ namespace TdseSolver_2D1P
                 {
                     string textLine = ReadTextLine(br);
 
-                    if ( textLine.StartsWith("Wavefunction") ) 
+                    if ( textLine.StartsWith("Wavefunction2D") ) 
                     {
                         string[] comps = textLine.Split(null);
                         format = comps[1];
@@ -238,8 +183,8 @@ namespace TdseSolver_2D1P
                     else if (textLine.StartsWith("DIMENSIONS"))
                     {
                         string[] comps = textLine.Split(null);
-                        gridSizeX = Int32.Parse(comps[1]);
-                        gridSizeY = Int32.Parse(comps[2]);
+                        sx = Int32.Parse(comps[1]);
+                        sy = Int32.Parse(comps[2]);
                     }
                     else if (textLine.StartsWith("LOOKUP_TABLE default"))
                     {
@@ -248,109 +193,56 @@ namespace TdseSolver_2D1P
                 }
 
                 // Bail out if the header was not what we expected
-                if ( string.IsNullOrEmpty(format) || (gridSizeX < 0) || (gridSizeY < 0) )
+                if ( string.IsNullOrEmpty(format) || (sx < 0) || (sy < 0) )
                 {
                     throw new ArgumentException("Invalid Wavefunction file, in Wavefunction.ReadFromVtkFile.");
                 }
-
-
-                // Allocate arrays
-                realPart = new float[gridSizeX][];
-                imagPart = new float[gridSizeX][];
-                for (int i = 0; i < gridSizeX; i++) 
-                { 
-                    realPart[i] = new float[gridSizeY]; 
-                    imagPart[i] = new float[gridSizeY];
+                if (format != "REAL_AND_IMAG")
+                {
+                    throw new ArgumentException("Unsupported Wavefunction format, in Wavefunction.ReadFromVtkFile. " + "(" + format + ")");
                 }
 
-                if (format == "REAL_AND_IMAG")
+                // Allocate the wf data array
+                wfData = TdseUtils.Misc.Allocate2DArray(sy, 2*sx);
+
+                unsafe
                 {
-                    // Read the real parts
-                    for (int y = 0; y < gridSizeY; y++)
+                    float floatVal = 0.0f;
+                    byte* floatBytes0 = (byte*)(&floatVal);
+                    byte* floatBytes1 = floatBytes0 + 1;
+                    byte* floatBytes2 = floatBytes0 + 2;
+                    byte* floatBytes3 = floatBytes0 + 3;
+                    int sx2 = 2*sx;
+
+                    // Read the real and imaginary parts
+                    byte[] bytePlane = br.ReadBytes(sx*sy*8);
+                        
+                    int n = 0;
+                    for (int y = 0; y < sy; y++)
                     {
-                        for (int x = 0; x < gridSizeX; x++)
+                        float[] dataY = wfData[y];
+                        for (int nx = 0; nx < sx2; nx++)
                         {
-                            byte[] bytes = br.ReadBytes(4);
-                            Array.Reverse(bytes); // Convert from big-endian
-                            realPart[x][y] = BitConverter.ToSingle(bytes, 0);
+                            *floatBytes3 = bytePlane[n];
+                            *floatBytes2 = bytePlane[n+1];
+                            *floatBytes1 = bytePlane[n+2];
+                            *floatBytes0 = bytePlane[n+3];
+                            dataY[nx] = floatVal;
+                            n += 4;
                         }
-                    }
-
-                    // Read the imaginary parts
-                    ReadTextLine(br);
-                    ReadTextLine(br);
-                    for (int y = 0; y < gridSizeY; y++)
-                    {
-                        for (int x = 0; x < gridSizeX; x++)
-                        {
-                            byte[] bytes = br.ReadBytes(4);
-                            Array.Reverse(bytes); // Convert from big-endian
-                            imagPart[x][y] = BitConverter.ToSingle(bytes, 0);
-                        }
-                    }
-                }
-
-                else if (format == "AMPLITUDE_AND_PHASE" || format == "AMPLITUDE_PHASE_AND_COLOR")
-                {
-                    float[][] ampl  = new float[gridSizeX][];
-                    float[][] phase = new float[gridSizeX][];
-                    for (int i = 0; i < gridSizeX; i++) 
-                    { 
-                        ampl[i]  = new float[gridSizeY]; 
-                        phase[i] = new float[gridSizeY];
-                    }
-
-                    // Read the amplitudes
-                    for (int y = 0; y < gridSizeY; y++)
-                    {
-                        for (int x = 0; x < gridSizeX; x++)
-                        {
-                            byte[] bytes = br.ReadBytes(4);
-                            Array.Reverse(bytes); // Convert from big-endian
-                            ampl[x][y] = BitConverter.ToSingle(bytes, 0);
-                        }
-                    }
-
-                    // Read the phases
-                    ReadTextLine(br);
-                    ReadTextLine(br);
-                    for (int y = 0; y < gridSizeY; y++)
-                    {
-                        for (int x = 0; x < gridSizeX; x++)
-                        {
-                            byte[] bytes = br.ReadBytes(4);
-                            Array.Reverse(bytes); // Convert from big-endian
-                            phase[x][y] = BitConverter.ToSingle(bytes, 0);
-                        }
-                    }
-
-                    // Convert to real and imaginary parts
-                    for (int y = 0; y < gridSizeY; y++)
-                    {
-                        for (int x = 0; x < gridSizeX; x++)
-                        {
-                            float aVal = ampl[x][y];
-                            float pVal = phase[x][y];
-                            realPart[x][y] = (float) ( aVal*Math.Cos(pVal) );
-                            imagPart[x][y] = (float) ( aVal*Math.Sin(pVal) );
-                        }
-                    }
-                }
-
-                else
-                {
-                    throw new ArgumentException("Unsupported format " + format + ", in Wavefunction.ReadFromVtkFile.");
+                    }          
                 }
 
             }
-            return new WaveFunction(realPart, imagPart, latticeSpacing);
+
+            return new WaveFunction(wfData, latticeSpacing);
         }
 
 
         /// <summary>
         /// Reads a text line from a binary file.
         /// </summary>
-        private static string ReadTextLine(BinaryReader br)
+        public static string ReadTextLine(BinaryReader br)
         {
             List<byte> bytes = new List<byte>();
             while ( !EndsWithNewLine(bytes) )

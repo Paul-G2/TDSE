@@ -51,8 +51,8 @@
             this.UpsampleFactor_NUD = new System.Windows.Forms.NumericUpDown();
             this.Upsample_Btn = new System.Windows.Forms.Button();
             this.groupBox7 = new System.Windows.Forms.GroupBox();
-            this.InputDir_Label = new System.Windows.Forms.Label();
             this.SelectFolder_Btn = new System.Windows.Forms.Button();
+            this.InputDir_TextBox = new System.Windows.Forms.TextBox();
             this.groupBox10.SuspendLayout();
             this.groupBox8.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SmoothingFactor_NUD)).BeginInit();
@@ -402,26 +402,13 @@
             // 
             this.groupBox7.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox7.Controls.Add(this.InputDir_Label);
+            this.groupBox7.Controls.Add(this.InputDir_TextBox);
             this.groupBox7.Controls.Add(this.SelectFolder_Btn);
             this.groupBox7.Location = new System.Drawing.Point(0, 0);
             this.groupBox7.Name = "groupBox7";
             this.groupBox7.Size = new System.Drawing.Size(743, 100);
             this.groupBox7.TabIndex = 13;
             this.groupBox7.TabStop = false;
-            // 
-            // InputDir_Label
-            // 
-            this.InputDir_Label.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.InputDir_Label.BackColor = System.Drawing.SystemColors.ControlLightLight;
-            this.InputDir_Label.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.InputDir_Label.Location = new System.Drawing.Point(144, 42);
-            this.InputDir_Label.Name = "InputDir_Label";
-            this.InputDir_Label.Size = new System.Drawing.Size(580, 20);
-            this.InputDir_Label.TabIndex = 1;
-            this.InputDir_Label.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // SelectFolder_Btn
             // 
@@ -432,6 +419,15 @@
             this.SelectFolder_Btn.Text = "Select Folder";
             this.SelectFolder_Btn.UseVisualStyleBackColor = true;
             this.SelectFolder_Btn.Click += new System.EventHandler(this.SelectFolder_Btn_Click);
+            // 
+            // InputDir_TextBox
+            // 
+            this.InputDir_TextBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.InputDir_TextBox.Location = new System.Drawing.Point(152, 43);
+            this.InputDir_TextBox.Name = "InputDir_TextBox";
+            this.InputDir_TextBox.Size = new System.Drawing.Size(572, 20);
+            this.InputDir_TextBox.TabIndex = 1;
             // 
             // PostProcessingControl
             // 
@@ -454,6 +450,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.XCrop2_NUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.UpsampleFactor_NUD)).EndInit();
             this.groupBox7.ResumeLayout(false);
+            this.groupBox7.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -470,7 +467,6 @@
         private System.Windows.Forms.NumericUpDown UpsampleFactor_NUD;
         private System.Windows.Forms.Button Upsample_Btn;
         private System.Windows.Forms.GroupBox groupBox7;
-        private System.Windows.Forms.Label InputDir_Label;
         private System.Windows.Forms.Button SelectFolder_Btn;
         private System.Windows.Forms.Button Crop_Btn;
         private System.Windows.Forms.NumericUpDown XCrop1_NUD;
@@ -485,5 +481,6 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.NumericUpDown SmoothingFactor_NUD;
         private System.Windows.Forms.Button Smooth_Btn;
+        private System.Windows.Forms.TextBox InputDir_TextBox;
     }
 }

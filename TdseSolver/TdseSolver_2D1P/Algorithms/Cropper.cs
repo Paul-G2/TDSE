@@ -15,10 +15,10 @@ namespace TdseSolver_2D1P
         // Class data
         string m_inputDir           = "";
         string m_outputDir          = "";
-        int    m_leftCrop           = 0;
-        int    m_rightCrop          = 0;
-        int    m_topCrop            = 0;
-        int    m_bottomCrop         = 0;
+        int    m_xminCrop           = 0;
+        int    m_xmaxCrop           = 0;
+        int    m_yminCrop           = 0;
+        int    m_ymaxCrop           = 0;
         int    m_numFilesToProcess  = 0;
         int    m_currentFileIndex   = 0;
 
@@ -26,13 +26,13 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Constructor.
         /// </summary>
-        public Cropper(string inputDir, int leftCrop, int topCrop, int rightCrop, int bottomCrop)
+        public Cropper(string inputDir, int xminCrop, int xmaxCrop, int yminCrop, int ymaxCrop)
         {
-            m_inputDir   = inputDir;
-            m_leftCrop   = leftCrop;
-            m_rightCrop  = rightCrop;
-            m_topCrop    = topCrop;
-            m_bottomCrop = bottomCrop;
+            m_inputDir = inputDir;
+            m_xminCrop = xminCrop;
+            m_xmaxCrop = xmaxCrop;
+            m_yminCrop = yminCrop;
+            m_ymaxCrop = ymaxCrop;
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace TdseSolver_2D1P
                     // Upsample one file, and save the result
                     string inputFile = vtkFiles[i];
                     WaveFunction wf = WaveFunction.ReadFromVtkFile(inputFile);
-                    wf = Crop( wf, m_leftCrop, m_topCrop, m_rightCrop, m_bottomCrop );
+                    wf = Crop( wf, m_xminCrop, m_xmaxCrop, m_yminCrop, m_ymaxCrop );
 
                     string outFile = Path.Combine(m_outputDir, Path.GetFileName(inputFile));
                     wf.SaveToVtkFile(outFile, WaveFunction.WfSaveFormat.REAL_AND_IMAG);
@@ -115,12 +115,11 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Crops a wavefunction.
         /// </summary>
-        public static WaveFunction Crop(WaveFunction wf, int leftCrop, int topCrop, int rightCrop, int bottomCrop)
+        public static WaveFunction Crop(WaveFunction wf, int xminCrop, int xmaxCrop, int yminCrop, int ymaxCrop)
         {
-            float[][] modRealPart = Crop(wf.RealPart, leftCrop, topCrop, rightCrop, bottomCrop);
-            float[][] modImagPart = Crop(wf.ImagPart, leftCrop, topCrop, rightCrop, bottomCrop);
+            float[][] modData = Crop(wf.Data, xminCrop, xmaxCrop, yminCrop, ymaxCrop);
   
-            return new WaveFunction(modRealPart, modImagPart, wf.LatticeSpacing);
+            return new WaveFunction(modData, wf.LatticeSpacing);
         }
 
 
@@ -128,32 +127,33 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Crops a 2D array.
         /// </summary>
-        public static float[][] Crop(float[][] inArray, int leftCrop, int topCrop, int rightCrop, int bottomCrop)
+        public static float[][] Crop(float[][] inArray, int xminCrop, int xmaxCrop, int yminCrop, int ymaxCrop)
         {
-            int inWidth  = inArray.Length;
-            int inHeight = (inWidth < 1) ? 0 : inArray[0].Length;
+            int syi  = inArray.Length;
+            int sxi = (syi < 1) ? 0 : inArray[0].Length/2;
 
-            if ( (leftCrop + rightCrop >= inWidth) || (topCrop + bottomCrop >= inHeight) )
+            if ( (xminCrop + xmaxCrop >= sxi) || (yminCrop + ymaxCrop >= syi) )
             {
                 throw new ArgumentException("Invalid crop parameters, in Cropper.Crop");
             }
 
-            int outWidth =  inWidth - leftCrop - rightCrop;
-            int outHeight = inHeight - topCrop - bottomCrop;
-
-            float[][] outArray = new float[outWidth][];
-            for (int i = 0; i < outWidth; i++) { outArray[i] = new float[outHeight]; }
+            int sxo = sxi - xminCrop - xmaxCrop;
+            int syo = syi - yminCrop - ymaxCrop;
+            float[][] outArray = TdseUtils.Misc.Allocate2DArray(syo, 2*sxo);
 
 
             // Loop over the pixels
-            for (int xIn = leftCrop; xIn < inWidth - rightCrop; xIn++)
+            for (int yi = yminCrop; yi < syi - ymaxCrop; yi++)
             {
-                float[] inArrayX = inArray[xIn];
-                float[] outArrayX = outArray[xIn-leftCrop];
+                float[] inArrayY = inArray[yi];
+                float[] outArrayY = outArray[yi-yminCrop];
 
-                for (int yIn = topCrop; yIn < inHeight - bottomCrop; yIn++)
+                for (int xi = xminCrop; xi < sxi - xmaxCrop; xi++)
                 {
-                    outArrayX[yIn-topCrop] = inArrayX[yIn];
+                    int ni = 2*xi;
+                    int no = 2*(xi-xminCrop);
+                    outArrayY[no]   = inArrayY[ni];
+                    outArrayY[no+1] = inArrayY[ni+1];
                 }
             }
             return outArray; 
