@@ -10,11 +10,11 @@ namespace TdseSolver_2D1P
     /// </summary>
     partial class WaveFunction
     {
-        #region Class data
-        float[][] m_realPart;
-        float[][] m_imagPart;
-        float m_latticeSpacing;
-        #endregion Class data
+        // Class data
+        float[][] m_data;   // (Re,Im) pairs, stored in [y][x] order, for compatibility with the vtk file format
+        float     m_latticeSpacing;
+
+
 
 
         /// <summary>
@@ -22,69 +22,31 @@ namespace TdseSolver_2D1P
         /// </summary>
         public WaveFunction(int gridSizeX, int gridSizeY, float latticeSpacing)
         {
-            m_realPart = new float[gridSizeX][];
-            m_imagPart = new float[gridSizeX][];
+            m_data = TdseUtils.Misc.Allocate2DArray(gridSizeY, 2*gridSizeX);
             m_latticeSpacing = latticeSpacing;
-
-            for (int i=0; i<gridSizeX; i++)
-            {
-                m_realPart[i] = new float[gridSizeY];
-                m_imagPart[i] = new float[gridSizeY];
-            }
         }
 
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public WaveFunction(float[][] realPart, float[][] imagPart, float latticeSpacing)
+        public WaveFunction(float[][] data, float latticeSpacing)
         {
-            // Check the inputs
-            if ( (realPart == null) != (imagPart == null) )
-            {
-                throw new ArgumentException("Invalid array(s) passed to Wavefunction ctor.");
-            }
-            if (realPart != null)
-            {
-                if (realPart.Length != imagPart.Length)
-                {
-                    throw new ArgumentException("Invalid array(s) passed to Wavefunction ctor.");
-                }
-                for (int i=0; i<realPart.Length; i++)
-                {
-                    if ( (realPart[i] == null) || (imagPart[i] == null) ||  (realPart[i].Length != imagPart[i].Length) )
-                    {
-                        throw new ArgumentException("Invalid array(s) passed to Wavefunction ctor.");
-                    }
-                }
-            }
-
-            // Accept the inputs
-            m_realPart = realPart;
-            m_imagPart = imagPart;
+            m_data = data;
             m_latticeSpacing = latticeSpacing;
         }
 
 
-        /// <summary>
-        /// Gets the real part of the wavefunction.
-        /// </summary>
-        public float[][] RealPart
-        {
-            get
-            {
-                return m_realPart;
-            }
-        }
+
 
         /// <summary>
-        /// Gets the imaginary part of the wavefunction.
+        /// Gets the array of wavefunction values.
         /// </summary>
-        public float[][] ImagPart
+        public float[][] Data
         {
             get
             {
-                return m_imagPart;
+                return m_data;
             }
         }
 
@@ -94,8 +56,9 @@ namespace TdseSolver_2D1P
         /// </summary>
         public float Ampl(int x, int y)
         {
-            float re = m_realPart[x][y];
-            float im = m_imagPart[x][y];
+            float[] dataY = m_data[y];
+            float re = dataY[2*x];
+            float im = dataY[2*x+1];
 
             return (float) Math.Sqrt(re*re + im*im);
         }
@@ -106,8 +69,9 @@ namespace TdseSolver_2D1P
         /// </summary>
         public float Prob(int x, int y)
         {
-            float re = m_realPart[x][y];
-            float im = m_imagPart[x][y];
+            float[] dataY = m_data[y];
+            float re = dataY[2*x];
+            float im = dataY[2*x+1];
 
             return (re*re + im*im);
         }
@@ -118,7 +82,9 @@ namespace TdseSolver_2D1P
         /// </summary>
         public float Phase(int x, int y)
         {
-            return (float) Math.Atan2(m_realPart[x][y], m_imagPart[x][y]);
+            float[] dataY = m_data[y];
+
+            return (float) Math.Atan2(dataY[2*x+1], dataY[2*x]);
         }
 
 
@@ -129,7 +95,7 @@ namespace TdseSolver_2D1P
         {
             get
             {
-                return m_realPart.Length;
+                return (m_data.Length > 0) ? m_data[0].Length/2 : 0;
             }
         }
 
@@ -141,7 +107,7 @@ namespace TdseSolver_2D1P
         {
             get
             {
-                return (m_realPart.Length > 0) ? m_realPart[0].Length : 0;
+                return m_data.Length;
             }
         }
 
@@ -165,21 +131,21 @@ namespace TdseSolver_2D1P
         {
             float normSq = 0.0f;
 
-            int nx = GridSizeX;
-            int ny = GridSizeY;
-            for (int x = 0; x < nx; x++)
+            int sy = GridSizeY;
+            int sx2 = 2*GridSizeX;
+
+            for (int y=0; y<sy; y++)
             {
-                float[] ReX = m_realPart[x];
-                float[] ImX = m_imagPart[x];
-                for (int y = 0; y < ny; y++)
+                float[] dataY = m_data[y];
+
+                for (int nx = 0; nx < sx2; nx++)
                 {
-                    float re = ReX[y];
-                    float im = ImX[y];
-                    normSq += (re*re + im*im);
-                }
+                    float val = dataY[nx];
+                    normSq += val*val;
+                }            
             }
 
-            normSq *= m_latticeSpacing*m_latticeSpacing;
+            normSq *= (m_latticeSpacing*m_latticeSpacing);
             return normSq;
         }
 
@@ -198,23 +164,20 @@ namespace TdseSolver_2D1P
         /// </summary>
         public void ScaleBy(float factor)
         {
-            int nx = GridSizeX;
-            int ny = GridSizeY;
-            for (int x = 0; x < nx; x++)
+            int sy = GridSizeY;
+            int sx2 = 2*GridSizeX;
+
+            for (int y=0; y<sy; y++)
             {
-                float[] ReX = m_realPart[x];
-                float[] ImX = m_imagPart[x];
-                for (int y = 0; y < ny; y++)
+                float[] dataY = m_data[y];
+
+                for (int nx = 0; nx < sx2; nx++)
                 {
-                    ReX[y] *= factor;
-                    ImX[y] *= factor;
-                }
+                    dataY[nx] *= factor;
+                }        
             }
         }
 
-        
-        // Worker delegate needed by the following method
-        private delegate void LoopDelegate(int x);
 
         /// <summary>
         /// Computes the result of applying a given Hamiltonian operator to this wavefunction.
@@ -222,12 +185,14 @@ namespace TdseSolver_2D1P
         public WaveFunction ApplyH(float[][] V, float mass, bool multiThread=true)
         {
             // Initialize locals
-            int nx = GridSizeX;
-            int ny = GridSizeY;
-            int nxm1 = nx - 1;
-            int nym1 = ny - 1;
-            int nxm2 = nx - 2;
-            int nym2 = ny - 2;
+            int sx = GridSizeX;
+            int sy = GridSizeY;
+            int sxm1  = sx - 1;
+            int sym1  = sy - 1;
+            int sxm2  = sx - 2;
+            int sym2  = sy - 2;
+            int sx2   = 2*sx;
+            int sx2m2 = sx2 - 2;
 
             float keFactor = 1.0f / (2 * mass *m_latticeSpacing * m_latticeSpacing);
 
@@ -235,67 +200,62 @@ namespace TdseSolver_2D1P
             float beta  = -4.0f / 3.0f;
             float delta = 1.0f / 12.0f;
 
-            WaveFunction outWf = new WaveFunction(nx, ny, m_latticeSpacing);
+            WaveFunction outWf = new WaveFunction(sx, sy, m_latticeSpacing);
 
 
             // Compute H * Wf
-            LoopDelegate YLoop = (x) =>
+            TdseUtils.Misc.LoopDelegate YLoop = (y) =>
             {
-                int xp = (x < nxm1) ? x + 1 : 0;
-                int xm = (x > 0) ? x - 1 : nxm1;
-                int xpp = (x < nxm2) ? x + 2 : (x == nxm2) ? 0 : 1;
-                int xmm = (x > 1) ? x - 2 : (x > 0) ? nxm1 : nxm2;
+                int yp  = (y  < sym1) ?  y + 1 : 0;
+                int ypp = (yp < sym1) ? yp + 1 : 0;
+                int ym  = (y  > 0) ?  y - 1 : sym1;
+                int ymm = (ym > 0) ? ym - 1 : sym1;
 
-                float[] Vx = V[x];
-                float[] inWfRx   = m_realPart[x];
-                float[] inWfRxm  = m_realPart[xm];
-                float[] inWfRxp  = m_realPart[xp];
-                float[] inWfRxmm = m_realPart[xmm];
-                float[] inWfRxpp = m_realPart[xpp];
-                float[] inWfIx   = m_imagPart[x];
-                float[] inWfIxm  = m_imagPart[xm];
-                float[] inWfIxp  = m_imagPart[xp];
-                float[] inWfIxmm = m_imagPart[xmm];
-                float[] inWfIxpp = m_imagPart[xpp];
-                float[] outWfRx  = outWf.RealPart[x];
-                float[] outWfIx  = outWf.ImagPart[x];
+                float[] inWf_y   = m_data[y];
+                float[] inWf_ym  = m_data[ym];
+                float[] inWf_yp  = m_data[yp];
+                float[] inWf_ymm = m_data[ymm];
+                float[] inWf_ypp = m_data[ypp];
+                float[] outWf_y  = outWf.m_data[y];
+                float[] V_y      = V[y];
 
-                for (int y = 0; y < ny; y++)
+                for (int rx = 0; rx < sx2; rx+=2)
                 {
-                    int yp = (y < nym1) ? y + 1 : 0;
-                    int ym = (y > 0) ? y - 1 : nym1;
-                    int ypp = (y < nym2) ? y + 2 : (y == nym2) ? 0 : 1;
-                    int ymm = (y > 1) ? y - 2 : (y > 0) ? nym1 : nym2;
+                    int rxp  = (rx  < sx2m2) ?  rx + 2  : 0;
+                    int rxpp = (rxp < sx2m2) ?  rxp + 2 : 0;
+                    int rxm  = (rx  > 0) ?  rx - 2 : sx2m2;
+                    int rxmm = (rxm > 0) ? rxm - 2 : sx2m2;
+                    int x = rx/2;
 
                     // Kinetic energy terms. 
-                    // (This discretization of the 2nd derivative has better rotational invariance than the standard one)
                     float kR = keFactor * (
-                        alpha * inWfRx[y] +
-                        beta  * (inWfRx[ym] + inWfRx[yp] + inWfRxm[y] + inWfRxp[y]) +
-                        delta * (inWfRx[ymm] + inWfRx[ypp] + inWfRxmm[y] + inWfRxpp[y])
+                        alpha * inWf_y[rx] +
+                        beta  * (inWf_y[rxm] + inWf_y[rxp] + inWf_ym[rx] + inWf_yp[rx]) +
+                        delta * (inWf_y[rxmm] + inWf_y[rxpp] + inWf_ymm[rx] + inWf_ypp[rx]) 
                     );
 
+                    int ix = rx + 1;
                     float kI = keFactor * (
-                        alpha * inWfIx[y] +
-                        beta  * (inWfIx[ym] + inWfIx[yp] + inWfIxm[y] + inWfIxp[y]) +
-                        delta * (inWfIx[ymm] + inWfIx[ypp] + inWfIxmm[y] + inWfIxpp[y])
+                        alpha * inWf_y[ix] +
+                        beta  * (inWf_y[rxm+1] + inWf_y[rxp+1] + inWf_ym[ix] + inWf_yp[ix]) +
+                        delta * (inWf_y[rxmm+1] + inWf_y[rxpp+1] + inWf_ymm[ix] + inWf_ypp[ix]) 
                     );
 
                     // Potential energy terms
-                    float vR = Vx[y] * inWfRx[y];
-                    float vI = Vx[y] * inWfIx[y];
+                    float vR = V_y[x] * inWf_y[rx];
+                    float vI = V_y[x] * inWf_y[ix];
 
-                    outWfRx[y] = kR + vR;
-                    outWfIx[y] = kI + vI;
+                    outWf_y[rx] = kR + vR;
+                    outWf_y[ix] = kI + vI;
                 }
             };
             if (multiThread)
             {
-                Parallel.For(0, nx, x => { YLoop(x); });
+                Parallel.For(0, sy, y => { YLoop(y); });
             }
             else
             {
-                for (int x = 0; x < nx; x++) { YLoop(x); }
+                for (int y = 0; y < sy; y++) { YLoop(y); }
             }
 
             return outWf;

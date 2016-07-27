@@ -112,10 +112,9 @@ namespace TdseSolver_2D1P
         /// </summary>
         public static WaveFunction Upsample(WaveFunction inputWf, double factor)
         {
-            float[][] modRealPart = UpsampleBicubic(inputWf.RealPart, factor);
-            float[][] modImagPart = UpsampleBicubic(inputWf.ImagPart, factor);
+            float[][] modData = UpsampleBicubic(inputWf.Data, factor);
   
-            WaveFunction outputWf = new WaveFunction( modRealPart, modImagPart, (float)(inputWf.LatticeSpacing/factor) );
+            WaveFunction outputWf = new WaveFunction( modData, (float)(inputWf.LatticeSpacing/factor) );
 
             // Match the normalization of the input wavefunction
             float normFactor = (float) Math.Sqrt( inputWf.NormSq()/outputWf.NormSq() );
@@ -136,22 +135,21 @@ namespace TdseSolver_2D1P
                 throw new ArgumentException("Upsampling factor must be greater than or equal to 1, in UpsampleBicubic");
             }
 
-            int inWidth  = inArray.Length;
-            int inHeight = (inWidth < 1) ? 0 : inArray[0].Length;
-            int outWidth =  (int)Math.Max(1, inWidth  * factor);
-            int outHeight = (int)Math.Max(1, inHeight * factor);
+            int syi  = inArray.Length;
+            int sxi = (syi < 1) ? 0 : inArray[0].Length/2;
+            int syo =  (int)Math.Max(1, syi  * factor);
+            int sxo = (int)Math.Max(1, sxi * factor);
 
-            float[][] outArray = new float[outWidth][];
-            for (int i = 0; i < outWidth; i++) { outArray[i] = new float[outHeight]; }
+            float[][] outArray = TdseUtils.Misc.Allocate2DArray(syo, 2*sxo);
 
             // Precalculate the weights and indices
             int[] xInm2, xInm1, xInp1, xInp2, yInm2, yInm1, yInp1, yInp2;
             float[] wxm2, wxm1, wxp1, wxp2, wym2, wym1, wyp1, wyp2;
-            GetUpsampleArrays_BiCubic(inWidth,  factor, out xInm2, out xInm1, out xInp1, out xInp2, out wxm2, out wxm1, out wxp1, out wxp2);
-            GetUpsampleArrays_BiCubic(inHeight, factor, out yInm2, out yInm1, out yInp1, out yInp2, out wym2, out wym1, out wyp1, out wyp2);
+            GetUpsampleArrays_BiCubic(sxi, factor, out xInm2, out xInm1, out xInp1, out xInp2, out wxm2, out wxm1, out wxp1, out wxp2);
+            GetUpsampleArrays_BiCubic(syi, factor, out yInm2, out yInm1, out yInp1, out yInp2, out wym2, out wym1, out wyp1, out wyp2);
 
             // Loop over the output pixels
-            for (int yOut = 0; yOut < outHeight; yOut++)
+            for (int yOut = 0; yOut < syo; yOut++)
             {
                 // Cache y-weights and offsets
                 float Wym2 = wym2[yOut];
@@ -159,30 +157,38 @@ namespace TdseSolver_2D1P
                 float Wyp1 = wyp1[yOut];
                 float Wyp2 = wyp2[yOut];
 
-                int YInm2 = yInm2[yOut];
-                int YInm1 = yInm1[yOut];
-                int YInp1 = yInp1[yOut];
-                int YInp2 = yInp2[yOut];
+                float[] inPlaneYInm2 = inArray[ yInm2[yOut] ];
+                float[] inPlaneYInm1 = inArray[ yInm1[yOut] ];
+                float[] inPlaneYInp1 = inArray[ yInp1[yOut] ];
+                float[] inPlaneYInp2 = inArray[ yInp2[yOut] ];
+                float[] outPlaneYOut = outArray[yOut];
 
-                for (int xOut = 0; xOut < outWidth; xOut++)
+                for (int xOut = 0; xOut < sxo; xOut++)
                 {
                     float Wxm2 = wxm2[xOut];
                     float Wxm1 = wxm1[xOut];
                     float Wxp1 = wxp1[xOut];
                     float Wxp2 = wxp2[xOut];
-                    int XInm2 = xInm2[xOut];
-                    int XInm1 = xInm1[xOut];
-                    int XInp1 = xInp1[xOut];
-                    int XInp2 = xInp2[xOut];
+                    int XInm2 = 2*xInm2[xOut];
+                    int XInm1 = 2*xInm1[xOut];
+                    int XInp1 = 2*xInp1[xOut];
+                    int XInp2 = 2*xInp2[xOut];
 
-                    // Bicubic formula
-                    float pixVal =
-                        Wym2 * (Wxm2 * inArray[XInm2][YInm2]   +   Wxm1 * inArray[XInm1][YInm2]   +   Wxp1 * inArray[XInp1][YInm2]   +   Wxp2 * inArray[XInp2][YInm2]) +
-                        Wym1 * (Wxm2 * inArray[XInm2][YInm1]   +   Wxm1 * inArray[XInm1][YInm1]   +   Wxp1 * inArray[XInp1][YInm1]   +   Wxp2 * inArray[XInp2][YInm1]) +
-                        Wyp1 * (Wxm2 * inArray[XInm2][YInp1]   +   Wxm1 * inArray[XInm1][YInp1]   +   Wxp1 * inArray[XInp1][YInp1]   +   Wxp2 * inArray[XInp2][YInp1]) +
-                        Wyp2 * (Wxm2 * inArray[XInm2][YInp2]   +   Wxm1 * inArray[XInm1][YInp2]   +   Wxp1 * inArray[XInp1][YInp2]   +   Wxp2 * inArray[XInp2][YInp2]);
+                    // Biicubic formula
+                    float pixValR = 
+                        Wym2 * (Wxm2 * inPlaneYInm2[XInm2] + Wxm1 * inPlaneYInm2[XInm1] + Wxp1 * inPlaneYInm2[XInp1] + Wxp2 * inPlaneYInm2[XInp2]) +
+                        Wym1 * (Wxm2 * inPlaneYInm1[XInm2] + Wxm1 * inPlaneYInm1[XInm1] + Wxp1 * inPlaneYInm1[XInp1] + Wxp2 * inPlaneYInm1[XInp2]) +
+                        Wyp1 * (Wxm2 * inPlaneYInp1[XInm2] + Wxm1 * inPlaneYInp1[XInm1] + Wxp1 * inPlaneYInp1[XInp1] + Wxp2 * inPlaneYInp1[XInp2]) + 
+                        Wyp2 * (Wxm2 * inPlaneYInp2[XInm2] + Wxm1 * inPlaneYInp2[XInm1] + Wxp1 * inPlaneYInp2[XInp1] + Wxp2 * inPlaneYInp2[XInp2]);
+                    outPlaneYOut[2*xOut] = pixValR;
 
-                    outArray[xOut][yOut] = pixVal;
+                    XInm2++; XInm1++; XInp1++; XInp2++;
+                    float pixValI =
+                        Wym2 * (Wxm2 * inPlaneYInm2[XInm2] + Wxm1 * inPlaneYInm2[XInm1] + Wxp1 * inPlaneYInm2[XInp1] + Wxp2 * inPlaneYInm2[XInp2]) +
+                        Wym1 * (Wxm2 * inPlaneYInm1[XInm2] + Wxm1 * inPlaneYInm1[XInm1] + Wxp1 * inPlaneYInm1[XInp1] + Wxp2 * inPlaneYInm1[XInp2]) +
+                        Wyp1 * (Wxm2 * inPlaneYInp1[XInm2] + Wxm1 * inPlaneYInp1[XInm1] + Wxp1 * inPlaneYInp1[XInp1] + Wxp2 * inPlaneYInp1[XInp2]) + 
+                        Wyp2 * (Wxm2 * inPlaneYInp2[XInm2] + Wxm1 * inPlaneYInp2[XInm1] + Wxp1 * inPlaneYInp2[XInp1] + Wxp2 * inPlaneYInp2[XInp2]);
+                    outPlaneYOut[2*xOut + 1] = pixValI;   
                 }
             }
             return outArray; 

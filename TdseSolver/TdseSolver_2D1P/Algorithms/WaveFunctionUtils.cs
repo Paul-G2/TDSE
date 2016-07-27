@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Drawing;
-using ComplexS = TdseUtils.Complex;
+using System.Threading.Tasks;
+using Complex = TdseUtils.Complex;
 
 
 namespace TdseSolver_2D1P
@@ -15,18 +16,42 @@ namespace TdseSolver_2D1P
         /// </summary>
         public static WaveFunction CreateGaussianWavePacket(
             int gridSizeX, int gridSizeY, float latticeSpacing, float mass,
-            PointF packetCenter, PointF packetWidth, PointF avgMomentum)
+            PointF packetCenter, PointF packetWidth, PointF avgMomentum, bool multiThread=true)
         {
             WaveFunction wf = new WaveFunction(gridSizeX, gridSizeY, latticeSpacing);
 
-            for (int y=0; y<gridSizeY; y++)
-            {
-                for (int x=0; x<gridSizeX; x++)
+            float[][] wfData = wf.Data;
+
+            Complex I = Complex.I;
+            float rootPi = (float) Math.Sqrt( Math.PI );
+            float sigmaXSq = packetWidth.X * packetWidth.X;
+            float sigmaYSq = packetWidth.Y * packetWidth.Y;
+            float norm = (float) Math.Sqrt( (packetWidth.X/(rootPi*sigmaXSq)) * (packetWidth.Y/(rootPi*sigmaYSq)) );
+
+            TdseUtils.Misc.LoopDelegate YLoop = (y) =>
+            {                
+                float yf = y * latticeSpacing;
+                Complex expArgY = I*yf*avgMomentum.Y - (yf - packetCenter.Y)*(yf - packetCenter.Y)/(2*sigmaYSq);
+                    
+                float[] wfDataY = wfData[y];
+                for (int x = 0; x < gridSizeX; x++)
                 {
-                    ComplexS wfVal = FreeGaussianWavePacketValue(x*latticeSpacing, y*latticeSpacing, 0, packetCenter, packetWidth, avgMomentum, mass);
-                    wf.RealPart[x][y] = wfVal.Re;
-                    wf.ImagPart[x][y] = wfVal.Im;
-                }
+                    float xf = x * latticeSpacing;
+
+                    Complex expArgYX = expArgY + I*xf*avgMomentum.X - (xf - packetCenter.X)*(xf - packetCenter.X)/(2*sigmaXSq);
+                    Complex wfVal = norm * Complex.Exp(expArgYX);
+ 
+                    wfDataY[2*x]   = wfVal.Re;
+                    wfDataY[2*x+1] = wfVal.Im;
+                }             
+            };
+            if (multiThread)
+            {
+                Parallel.For(0, gridSizeY, y => { YLoop(y); });
+            }
+            else
+            {
+                for (int y = 0; y < gridSizeY; y++) { YLoop(y); }
             }
 
             wf.Normalize();
@@ -34,28 +59,29 @@ namespace TdseSolver_2D1P
         }
 
 
+
         /// <summary>
         /// Calculates the value of a (freely evolving) Gaussian wavepacket at a given location and time. 
         /// </summary>
-        public static ComplexS FreeGaussianWavePacketValue(float x, float y, float t, 
+        public static Complex FreeGaussianWavePacketValue(float x, float y, float t, 
             PointF initialCenter, PointF initialWidth, PointF avgMomentum, float mass )
         {
-            ComplexS I = ComplexS.I;
+            Complex I = Complex.I;
 
-            ComplexS effSigmaXSq = initialWidth.X*initialWidth.X + I*(t/mass);
-            ComplexS effSigmaYSq = initialWidth.Y*initialWidth.Y + I*(t/mass);
+            Complex effSigmaXSq = initialWidth.X*initialWidth.X + I*(t/mass);
+            Complex effSigmaYSq = initialWidth.Y*initialWidth.Y + I*(t/mass);
 
             float xRel = x - initialCenter.X - avgMomentum.X*t/mass;
             float yRel = y - initialCenter.Y - avgMomentum.Y*t/mass;
 
             float avgMomentumSq = avgMomentum.X*avgMomentum.X + avgMomentum.Y*avgMomentum.Y;
-            ComplexS expArg = I*(x*avgMomentum.X + y*avgMomentum.Y) - I*t*avgMomentumSq/(2*mass) - (xRel*xRel)/(2*effSigmaXSq) - (yRel*yRel)/(2*effSigmaYSq); 
+            Complex expArg = I*(x*avgMomentum.X + y*avgMomentum.Y) - I*t*avgMomentumSq/(2*mass) - (xRel*xRel)/(2*effSigmaXSq) - (yRel*yRel)/(2*effSigmaYSq); 
 
             float rootPi = (float) Math.Sqrt( Math.PI );
-            ComplexS normX = ComplexS.Sqrt( initialWidth.X/(rootPi*effSigmaXSq) );
-            ComplexS normY = ComplexS.Sqrt( initialWidth.Y/(rootPi*effSigmaYSq) );
+            Complex normX = Complex.Sqrt( initialWidth.X/(rootPi*effSigmaXSq) );
+            Complex normY = Complex.Sqrt( initialWidth.Y/(rootPi*effSigmaYSq) );
 
-            ComplexS wfVal = normX*normY * ComplexS.Exp(expArg);
+            Complex wfVal = normX*normY * Complex.Exp(expArg);
 
             return wfVal;
         }

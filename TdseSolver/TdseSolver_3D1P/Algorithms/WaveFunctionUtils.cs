@@ -32,7 +32,7 @@ namespace TdseSolver_3D1P
             float sigmaZSq = packetWidth.Z * packetWidth.Z;
             float norm = (float) Math.Sqrt( (packetWidth.X/(rootPi*sigmaXSq)) * (packetWidth.Y/(rootPi*sigmaYSq)) * (packetWidth.Z/(rootPi*sigmaZSq)) );
 
-            LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
             {
                 float zf = z * latticeSpacing;
                 Complex expArgZ = I*zf*avgMomentum.Z - (zf - packetCenter.Z)*(zf - packetCenter.Z)/(2*sigmaZSq);
@@ -100,9 +100,6 @@ namespace TdseSolver_3D1P
             return wfVal;
         }
 
-
-        // Declare a worker delegate needed by some methods
-        private delegate void LoopDelegate(int x);
 
     }
 }

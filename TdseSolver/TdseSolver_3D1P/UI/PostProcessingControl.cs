@@ -34,7 +34,7 @@ namespace TdseSolver_3D1P
 
             // Load last-used settings
             string lastDir = Properties.Settings.Default.LastPostProcFolder;
-            InputDir_Label.Text = string.IsNullOrEmpty(lastDir) ? "C:\\" : lastDir;
+            InputDir_TextBox.Text = string.IsNullOrEmpty(lastDir) ? "C:\\" : lastDir;
 
             try
             {
@@ -99,8 +99,8 @@ namespace TdseSolver_3D1P
         void OnSolverCompletion(object sender, EventArgs e)
         {
             // Set my input dir equal to the Solver's last output dir
-            InputDir_Label.Text = m_associatedSolver.LastOutputDir;
-            Properties.Settings.Default.LastPostProcFolder = InputDir_Label.Text;
+            InputDir_TextBox.Text = m_associatedSolver.LastOutputDir;
+            Properties.Settings.Default.LastPostProcFolder = InputDir_TextBox.Text;
             Properties.Settings.Default.Save();
         }
 
@@ -113,13 +113,13 @@ namespace TdseSolver_3D1P
             // Launch the folder browser
             m_folderBrowserDlg.Description = "Select Input Folder";
             m_folderBrowserDlg.RootFolder = Environment.SpecialFolder.MyComputer;
-            m_folderBrowserDlg.SelectedPath = InputDir_Label.Text;
+            m_folderBrowserDlg.SelectedPath = InputDir_TextBox.Text;
 
             // Accept the selection
             DialogResult dlgResult = m_folderBrowserDlg.ShowDialog();
             if (dlgResult == DialogResult.OK || dlgResult == DialogResult.Yes)
             {
-                InputDir_Label.Text = m_folderBrowserDlg.SelectedPath;
+                InputDir_TextBox.Text = m_folderBrowserDlg.SelectedPath;
                 Properties.Settings.Default.LastPostProcFolder = m_folderBrowserDlg.SelectedPath;
                 Properties.Settings.Default.Save();
             }
@@ -162,7 +162,7 @@ namespace TdseSolver_3D1P
         private void Upsample_Btn_Click(object sender, EventArgs e)
         {
             // Check whether we actually have any files to process
-            string inputDir = InputDir_Label.Text;
+            string inputDir = InputDir_TextBox.Text;
             if ( !Directory.Exists(inputDir) )
             {
                 MessageBox.Show("The chosen input directory does not exist.");
@@ -200,7 +200,7 @@ namespace TdseSolver_3D1P
         private void Smooth_Btn_Click(object sender, EventArgs e)
         {
             // Check whether we actually have any files to process
-            string inputDir = InputDir_Label.Text;
+            string inputDir = InputDir_TextBox.Text;
             if ( !Directory.Exists(inputDir) )
             {
                 MessageBox.Show("The chosen input directory does not exist.");
@@ -238,7 +238,7 @@ namespace TdseSolver_3D1P
         private void Crop_Btn_Click(object sender, EventArgs e)
         {
             // Check whether we actually have any files to process
-            string inputDir = InputDir_Label.Text;
+            string inputDir = InputDir_TextBox.Text;
             if ( !Directory.Exists(inputDir) )
             {
                 MessageBox.Show("The chosen input directory does not exist.");
@@ -283,7 +283,7 @@ namespace TdseSolver_3D1P
         private void ReColor_Btn_Click(object sender, EventArgs e)
         {
             // Check whether we actually have any files to process
-            string inputDir = InputDir_Label.Text;
+            string inputDir = InputDir_TextBox.Text;
             if ( !Directory.Exists(inputDir) )
             {
                 MessageBox.Show("The chosen input directory does not exist.");
@@ -388,8 +388,8 @@ namespace TdseSolver_3D1P
 
                 if (lastOutputDir != null) 
                 {
-                    InputDir_Label.Text = lastOutputDir;
-                    Properties.Settings.Default.LastPostProcFolder = InputDir_Label.Text;
+                    InputDir_TextBox.Text = lastOutputDir;
+                    Properties.Settings.Default.LastPostProcFolder = InputDir_TextBox.Text;
                     Properties.Settings.Default.Save();
                 }
             }
@@ -405,6 +405,7 @@ namespace TdseSolver_3D1P
         void EnableInputs(bool val)
         {
             SelectFolder_Btn.Enabled = val;
+            InputDir_TextBox.Enabled = val;
             Upsample_Btn.Enabled = val;
             Smooth_Btn.Enabled = val;
             ReColor_Btn.Enabled = val;

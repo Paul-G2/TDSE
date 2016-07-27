@@ -53,6 +53,7 @@
   <ItemGroup>
     <Compile Include="Algorithms\Colorer.cs" />
     <Compile Include="Algorithms\Cropper.cs" />
+    <Compile Include="Algorithms\Smoother.cs" />
     <Compile Include="Algorithms\VisscherWf.cs" />
     <Compile Include="UI\MainForm.cs">
       <SubType>Form</SubType>

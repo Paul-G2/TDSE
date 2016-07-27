@@ -21,7 +21,7 @@ namespace TdseSolver_2D1P
         int            m_lastSavedFrame = -1;
         string         m_outputDir      = "";
 
-        // Event that is fired when the solver completes successfully
+        // Event that we fire when the solver completes successfully
         public event EventHandler OnNormalCompletion = null;
 
         
@@ -30,7 +30,7 @@ namespace TdseSolver_2D1P
         public SolverControl()
         {
             InitializeComponent();
-            m_vBuilder = new VCodeBuilder();
+            m_vBuilder = new VCodeBuilder(); // Also loads the last-used code snippet
 
             // Load the last-used params
             if ( !string.IsNullOrEmpty(Properties.Settings.Default.LastRunParams) )
@@ -139,6 +139,8 @@ namespace TdseSolver_2D1P
 
             parms.MultiThread = MultiThread_CheckBox.Checked;
 
+            parms.VCode = RunParams.FromString(Properties.Settings.Default.LastRunParams).VCode;
+
             return parms;
         }
 
@@ -169,6 +171,8 @@ namespace TdseSolver_2D1P
 
             MultiThread_CheckBox.Checked = parms.MultiThread;
 
+            m_vBuilder.SetCode(parms.VCode);
+
             return parms;
         }
 
@@ -183,9 +187,7 @@ namespace TdseSolver_2D1P
 
             // Write the run parameters to a file
             string paramsFile = Path.Combine(m_outputDir, "Params.txt");
-            File.WriteAllText(paramsFile, m_params.ToString());
-            File.AppendAllText(paramsFile, Environment.NewLine + Environment.NewLine + 
-                m_vBuilder.GetLastSavedCode().Replace("\n", "\r\n"));
+            File.WriteAllText(paramsFile, m_params.ToString().Replace("\n", "\r\n"));
 
 
             // Create the initial wavefunction
@@ -193,7 +195,8 @@ namespace TdseSolver_2D1P
                 m_params.GridSizeX, m_params.GridSizeY, m_params.LatticeSpacing, m_params.ParticleMass,
                 m_params.InitialWavePacketCenter, 
                 m_params.InitialWavePacketSize,
-                m_params.InitialWavePacketMomentum
+                m_params.InitialWavePacketMomentum,
+                m_params.MultiThread
             );
 
             // Save the initial wf as Frame 0 
@@ -357,11 +360,11 @@ namespace TdseSolver_2D1P
 
             // Create a fresh direcory
             int index = 0;
-            string dir = outputDrive + ":\\" + "WfAnimations" + "\\" + index.ToString("D4"); 
+            string dir = outputDrive + ":\\" + "WfAnimations2D" + "\\" + index.ToString("D4"); 
             while ( Directory.Exists(dir) )
             {
                 index++;
-                dir = outputDrive + ":\\" + "WfAnimations" + "\\" + index.ToString("D4"); 
+                dir = outputDrive + ":\\" + "WfAnimations2D" + "\\" + index.ToString("D4"); 
             }
             try
             {

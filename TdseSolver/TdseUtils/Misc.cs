@@ -65,5 +65,9 @@ namespace TdseUtils
             }
         }
 
+
+
+        // Declare a worker delegate needed by some methods
+        public delegate void LoopDelegate(int n);
     }
 }

@@ -5,10 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 
-namespace TdseSolver_3D1P
+namespace TdseSolver_2D1P
 {
     /// <summary>
-    /// This class provides methods for smoothing a wavefunction.
+    /// This class provides methods for upsampling a wavefunction (so that it looks smoother).
     /// </summary>
     class Smoother : TdseUtils.Proc
     {
@@ -54,11 +54,9 @@ namespace TdseSolver_3D1P
         /// </summary>
         protected override void WorkerMethod()
         {
-            // Get the list of files to process
             string[] vtkFiles = Directory.GetFiles(m_inputDir, "*.vtk");
             if ( (vtkFiles==null) || (vtkFiles.Length == 0) ) { return; }
 
-            // Initialize the output directory
             m_outputDir = CreateOutputDir(m_inputDir);
             string paramsFile = Path.Combine(m_inputDir, "Params.txt");
             if (File.Exists(paramsFile))
@@ -66,7 +64,6 @@ namespace TdseSolver_3D1P
                 File.Copy(paramsFile, Path.Combine(m_outputDir, Path.GetFileName(paramsFile)));
             }
 
-            // Process the files
             m_numFilesToProcess = vtkFiles.Length;
             int chunkSize = Environment.ProcessorCount;
             for (int iStart = 0; iStart < m_numFilesToProcess; iStart += chunkSize)
@@ -77,6 +74,7 @@ namespace TdseSolver_3D1P
                     string inFile = vtkFiles[i];
                     string outFile = Path.Combine(m_outputDir, Path.GetFileName(inFile));
                     ProcessFile(inFile, outFile);
+
                 });
 
                 // Report progress to the caller
@@ -112,14 +110,10 @@ namespace TdseSolver_3D1P
         {
             unsafe
             {
-                int sx = -1,  sy = -1,  sz = -1;
+                int sx = -1,  sy = -1;
                 string format = "";
                 float latticeSpacing = 0.0f;
                 string nl = Environment.NewLine;
-
-                float[] kernel = CreateGaussianKernel(m_smoothingFactor);
-                int sk = kernel.Length;
-                int hsk = (sk-1)/2;
                 
                 using (BinaryReader br = new BinaryReader(File.Open(inFile, FileMode.Open)))
                 {
@@ -128,7 +122,7 @@ namespace TdseSolver_3D1P
                     {
                         string textLine = WaveFunction.ReadTextLine(br);
 
-                        if (textLine.StartsWith("Wavefunction3D"))
+                        if (textLine.StartsWith("Wavefunction2D"))
                         {
                             string[] comps = textLine.Split(null);
                             format = comps[1];
@@ -139,7 +133,6 @@ namespace TdseSolver_3D1P
                             string[] comps = textLine.Split(null);
                             sx = Int32.Parse(comps[1]);
                             sy = Int32.Parse(comps[2]);
-                            sz = Int32.Parse(comps[3]);
                         }
                         else if (textLine.StartsWith("LOOKUP_TABLE default"))
                         {
@@ -147,20 +140,42 @@ namespace TdseSolver_3D1P
                         }
                     }
                     // Bail out if the header was not what we expected
-                    if (string.IsNullOrEmpty(format) || (sx < 0) || (sy < 0) || (sz < 0))
+                    if (string.IsNullOrEmpty(format) || (sx < 0) || (sy < 0))
                     {
                         throw new ArgumentException("Invalid Wavefunction file, in Colorer.ProcessFile.");
                     }
-                    if (format != "REAL_AND_IMAG")
+                    if ( (format != "AMPLITUDE_ONLY") && (format != "AMPLITUDE_AND_COLOR") )
                     {
                         throw new ArgumentException("Unsupported Wavefunction format, in Smoother.ProcessFile. " + "(" + format + ")");
                     }
 
-                    // Allocate some storage
-                    float[][][] slab    = TdseUtils.Misc.Allocate3DArray(sk, sy, 2*sx);
-                    float[][] outPlane  = TdseUtils.Misc.Allocate2DArray(sy, 2*sx);
-                    float[][] workSpace = TdseUtils.Misc.Allocate2DArray(sy, 2*sx);
+                    // Read the amplitude values
+                    byte[] bytePlane = br.ReadBytes(sx*sy*4);
+                    float[][] amplitudes = TdseUtils.Misc.Allocate2DArray(sy,sx);
 
+                    float floatVal = 0.0f;
+                    byte* floatBytes0 = (byte*)(&floatVal);
+                    byte* floatBytes1 = floatBytes0 + 1;
+                    byte* floatBytes2 = floatBytes0 + 2;
+                    byte* floatBytes3 = floatBytes0 + 3;
+                        
+                    int n = 0;
+                    for (int y = 0; y < sy; y++)
+                    {
+                        float[] amplitudesY = amplitudes[y];
+                        for (int x = 0; x < sx; x++)
+                        {
+                            *floatBytes3 = bytePlane[n];
+                            *floatBytes2 = bytePlane[n+1];
+                            *floatBytes1 = bytePlane[n+2];
+                            *floatBytes0 = bytePlane[n+3];
+                            amplitudesY[x] = floatVal;
+                            n += 4;
+                        }
+                    }          
+                
+                    // Smooth the amplitudes
+                    float[][] smoothedAmplitudes = Smooth(amplitudes, m_smoothingFactor, true);
 
                     // Create and open the output file
                     using (FileStream fileStream = File.Create(outFile))
@@ -169,203 +184,111 @@ namespace TdseSolver_3D1P
                         {
                             // Write the output header
                             bw.Write(Encoding.ASCII.GetBytes("# vtk DataFile Version 3.0" + nl));
-                            bw.Write(Encoding.ASCII.GetBytes("Wavefunction3D " + "REAL_AND_IMAG" + " " + "spacing: " + latticeSpacing.ToString() + nl));
+                            bw.Write(Encoding.ASCII.GetBytes("Wavefunction2D " + format + " " + "spacing: " + latticeSpacing.ToString() + nl));
                             bw.Write(Encoding.ASCII.GetBytes("BINARY" + nl));
                             bw.Write(Encoding.ASCII.GetBytes("DATASET STRUCTURED_POINTS" + nl));
-                            bw.Write(Encoding.ASCII.GetBytes("DIMENSIONS " + sx + " " + sy + " " + sz + nl));
+                            bw.Write(Encoding.ASCII.GetBytes("DIMENSIONS " + sx + " " + sy + " 1" + nl));
                             bw.Write(Encoding.ASCII.GetBytes("ORIGIN 0 0 0" + nl));
                             bw.Write(Encoding.ASCII.GetBytes("SPACING 1 1 1" + nl));
-                            bw.Write(Encoding.ASCII.GetBytes("POINT_DATA " +  sx*sy*sz + nl));
-                            bw.Write(Encoding.ASCII.GetBytes("SCALARS wf float 2" + nl));
+                            bw.Write(Encoding.ASCII.GetBytes("POINT_DATA " +  sx*sy + nl));
+
+                            // Write out the smoothed amplitudes
+                            bw.Write(Encoding.ASCII.GetBytes("SCALARS amplitude float" + nl));
                             bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
 
-                            // Read the initial few planes
-                            for (int i=hsk; i<sk; i++)
+                            n = 0;
+                            for (int y = 0; y < sy; y++)
                             {
-                                GetNextXYPlane(br, kernel, workSpace, slab[i]);
+                                float[] smY = smoothedAmplitudes[y];
+
+                                for (int x = 0; x < sx; x++)
+                                {
+                                    floatVal = smY[x];
+                                    bytePlane[n]   = *floatBytes3;
+                                    bytePlane[n+1] = *floatBytes2;
+                                    bytePlane[n+2] = *floatBytes1;
+                                    bytePlane[n+3] = *floatBytes0;
+                                    n += 4;
+                                }
                             }
-                            for (int i=0; i<hsk; i++)
+                            bw.Write(bytePlane);
+                            
+                            // Copy the color data from input to output
+                            if (format == "AMPLITUDE_AND_COLOR")
                             {
-                                TdseUtils.Misc.Copy2DArray(slab[sk-1-i], slab[i]); // Mirror boundary conditions on z
-                            }
-                            // Smooth along z, and write-out the result
-                            SmoothAlongZ(slab, kernel, outPlane);
-                            WriteXYPlane(bw, outPlane);
-
-
-                            // Loop over remaining planes
-                            for (int z=1; z<sz; z++)
-                            {
-                                // Cycle the z-planes, and read-in a new one
-                                float[][] temp = slab[0];
-                                for (int i=0; i<sk-1; i++)
-                                {
-                                    slab[i] = slab[i+1];
-                                }
-                                slab[sk-1] = temp;
-                                if (z < sz - hsk)
-                                {
-                                    GetNextXYPlane(br, kernel, workSpace, slab[sk-1]);
-                                }
-                                else
-                                {
-                                    TdseUtils.Misc.Copy2DArray(slab[2*(sz-1-z)], slab[sk-1]); // Mirror boundary conditions on z
-                                }
-
-                                // Smooth along z, and write-out the result
-                                SmoothAlongZ(slab, kernel, outPlane);
-                                WriteXYPlane(bw, outPlane);
+                                WaveFunction.ReadTextLine(br);
+                                WaveFunction.ReadTextLine(br);
+                                bw.Write(Encoding.ASCII.GetBytes("SCALARS colors unsigned_char 3" + nl));
+                                bw.Write(Encoding.ASCII.GetBytes("LOOKUP_TABLE default" + nl));
+                                bw.Write( br.ReadBytes(sx*sy*3) );
                             }
                         }
                     }
                 }
             }
         }
-
-
-        /// <summary>
-        /// Reads a plane of (re,im) values, and smooths it.
-        /// </summary>
-        private static void GetNextXYPlane(BinaryReader br, float[] kernel, float[][] workSpace, float[][] outPlane)
-        {
-            int sy  = outPlane.Length;
-            int sx2 = outPlane[0].Length;
-
-            unsafe
-            {
-                float fVal = 0.0f;
-                byte* fv0 = (byte*)(&fVal);
-                byte* fv1 = fv0 + 1;
-                byte* fv2 = fv0 + 2;
-                byte* fv3 = fv0 + 3;
-
-                byte[] inPlane = br.ReadBytes(sx2*sy*4);
-
-                int n = 0;
-                for (int y = 0; y < sy; y++)
-                {
-                    float[] outPlaneY = outPlane[y];
-
-                    for (int x = 0; x < sx2; x++)
-                    {
-                        *fv3 = inPlane[n];   // Reverse the byte order
-                        *fv2 = inPlane[n+1];
-                        *fv1 = inPlane[n+2];
-                        *fv0 = inPlane[n+3];
-                        outPlaneY[x] = fVal;
-                        n += 4;
-                    }
-                }
-            }
-
-            // Apply smoothing
-            SmoothXYPlane(outPlane, workSpace, kernel);
-        }
-
-
-
-        /// <summary>
-        /// Writes a plane of values.
-        /// </summary>
-        private static void WriteXYPlane(BinaryWriter bw, float[][] plane)
-        {
-            int sy = plane.Length;
-            int sx2 = plane[0].Length;
-
-            unsafe
-            {
-                float fVal = 0.0f;
-                byte* fv0 = (byte*)(&fVal);
-                byte* fv1 = fv0 + 1;
-                byte* fv2 = fv0 + 2;
-                byte* fv3 = fv0 + 3;
-
-                byte[] outBytes = new byte[sx2*sy*4];
-
-                int n = 0;
-                for (int y = 0; y < sy; y++)
-                {
-                    float[] planeY = plane[y];
-
-                    for (int x = 0; x < sx2; x++)
-                    {
-                        fVal = planeY[x];
-                        outBytes[n]   = *fv3;
-                        outBytes[n+1] = *fv2;
-                        outBytes[n+2] = *fv1;
-                        outBytes[n+3] = *fv0;
-                        n += 4;
-                    }
-                }
-                bw.Write(outBytes);
-            }
-        }
         
-        
+
         /// <summary>
-        /// Smooths a 2D array of (re,im) pairs, with a gaussian kernel.
+        /// Smooths a 2D array with a gaussian kernel.
         /// </summary>
-        private static void SmoothXYPlane(float[][] array, float[][] workSpace, float[] kernel)
+        public static float[][] Smooth(float[][] inArray, double factor, bool normalize)
         {
-            int sy = array.Length;
-            int sx2 = array[0].Length;
+            float[] kernel = CreateGaussianKernel(factor);
 
-            if ( (sy != workSpace.Length) || (sx2 != workSpace[0].Length) )
-            {
-                throw new ArgumentException("Array size mismatch, in Smoother.SmoothXYPlane");
-            }
-
+            int sy  = inArray.Length;
+            int sx = (sy < 1) ? 0 : inArray[0].Length;
             int sk = kernel.Length;
             int hsk = (sk-1)/2;
-            int hsk2 = (sk-1);
 
+            float[][] outArray = TdseUtils.Misc.Allocate2DArray(sy,sx);
 
             // x-convolution
             for (int y = 0; y < sy; y++)
             {
-                float[] arrayY  = array[y];
-                float[] workSpaceY = workSpace[y];
+                float[] inArrayY = inArray[y];
+                float[] outArrayY = outArray[y];
 
-                // Fast inner loop with no boundary checking
-                for (int x=hsk2; x<sx2-hsk2; x++)
+                // Fast interior loop with no boundary checking
+                for (int x=hsk; x<sx-hsk; x++)
                 {
-                    int xp = x - hsk2;
+                    int xp = x - hsk;
                     float pixVal = 0.0f;
                     for (int i=0; i<sk; i++)
                     {
-                        pixVal += kernel[i] * arrayY[xp + 2*i];
+                        pixVal += kernel[i] * inArrayY[xp + i];
                     }
-                    workSpaceY[x] = pixVal;
+                    outArrayY[x] = pixVal;
                 }
-                // Front-edge pixels
-                for (int x=0; x<hsk2; x++)
+                // Left edge
+                for (int x=0; x<hsk; x++)
                 {
                     float pixVal = 0.0f;
                     for (int i=0; i<sk; i++)
                     {
-                        int n = x - hsk2 + 2*i;
+                        int n = x - hsk + i;
                         if (n < 0) { n = -n; }
-                        pixVal += kernel[i] * arrayY[n];
+                        pixVal += kernel[i] * inArrayY[n];
                     }
-                    workSpaceY[x] = pixVal;
+                    outArrayY[x] = pixVal;
                 }
-                // Back-Edge pixels
-                for (int x=sx2-hsk2; x<sx2; x++)
+                // Right edge 
+                for (int x=sx-hsk; x<sx; x++)
                 {
                     float pixVal = 0.0f;
                     for (int i=0; i<sk; i++)
                     {
-                        int n = x - hsk2 + 2*i;
-                        if (n >= sx2) { n = 2*sx2-2-n; }
-                        pixVal += kernel[i] * arrayY[n];
+                        int n = x - hsk + i;
+                        if (n >= sx) { n = 2*sx-2-n; }
+                        pixVal += kernel[i] * inArrayY[n];
                     }
-                    workSpaceY[x] = pixVal;
+                    outArrayY[x] = pixVal;
                 }
             }
-            
 
             // y-convolution
-            for (int x = 0; x < sx2; x++)
+            float[] tempArray = new float[sy];
+            for (int x = 0; x < sx; x++)
             {
                 // Fast inner loop with no boundary checking
                 for (int y=hsk; y<sy-hsk; y++)
@@ -374,11 +297,11 @@ namespace TdseSolver_3D1P
                     float pixVal = 0.0f;
                     for (int i=0; i<sk; i++)
                     {
-                        pixVal += kernel[i] * workSpace[yp+i][x];
+                        pixVal += kernel[i] * outArray[yp+i][x];
                     }
-                    array[y][x] = pixVal;
+                    tempArray[y] = pixVal;
                 }
-                // Front-edge pixels
+                // top-edge pixels
                 for (int y=0; y<hsk; y++)
                 {
                     float pixVal = 0.0f;
@@ -386,11 +309,11 @@ namespace TdseSolver_3D1P
                     {
                         int n = y - hsk + i;
                         if (n < 0) { n = -n; }
-                        pixVal += kernel[i] * workSpace[n][x];
+                        pixVal += kernel[i] * outArray[n][x];
                     }
-                    array[y][x] = pixVal;
+                    tempArray[y] = pixVal;
                 }
-                // Back-Edge pixels
+                // bottom-edge pixels
                 for (int y=sy-hsk; y<sy; y++)
                 {
                     float pixVal = 0.0f;
@@ -398,48 +321,51 @@ namespace TdseSolver_3D1P
                     {
                         int n = y - hsk + i;
                         if (n >= sy) { n = 2*sy-2-n; }
-                        pixVal += kernel[i] * workSpace[n][x];
+                        pixVal += kernel[i] * outArray[n][x];
                     }
-                    array[y][x] = pixVal;
+                    tempArray[y] = pixVal;
                 }
-            }
-        }
-                           
-
-
-        /// <summary>
-        /// Smooths a slab along the z-direction.
-        /// </summary>
-        private static void SmoothAlongZ(float[][][] inSlab, float[] kernel, float[][] outPlane)
-        {
-            int sz  = inSlab.Length;
-            int sy  = inSlab[0].Length;
-            int sx2 = inSlab[0][0].Length;
-            int sk  = kernel.Length;
-            int hsk = (sk-1)/2;
-
-            if ((sy != outPlane.Length) || (sx2 != outPlane[0].Length) || (sz != sk) )
-            {
-                throw new ArgumentException("Array size mismatch, in Smoother.SmoothAlongZ");
-            }
-
-            // z-convolution
-            for (int y = 0; y < sy; y++)
-            {
-                for (int x = 0; x < sx2; x++)
+                for (int y=0; y<sy; y++)
                 {
-                    float pixVal = 0.0f;
-                    for (int i=0; i<sk; i++)
-                    {
-                        pixVal += kernel[i] * inSlab[i][y][x];
-                    }
-                    outPlane[y][x] = pixVal;
+                    outArray[y][x] = tempArray[y];
                 }
             }
             
+            // Maybe rescale the output to the same normalization as the input
+            if (normalize)
+            {
+                // Compute the normalization factor
+                float inNormSq = 0.0f;
+                float outNormSq = 0.0f;
+
+                for (int y=0; y<sy; y++)
+                {
+                    float[] inArrayY = inArray[y];
+                    float[] outArrayY = outArray[y];
+                    for (int x=0; x<sx; x++)
+                    {
+                        float inVal = inArrayY[x];
+                        float outVal = outArrayY[x];
+                        inNormSq += inVal*inVal;
+                        outNormSq += outVal*outVal;
+                    }
+                }
+                float normFactor = (float) Math.Sqrt(inNormSq/outNormSq);
+
+                // Rescale the output
+                for (int y=0; y<sy; y++)
+                {
+                    float[] outArrayY = outArray[y];
+                    for (int x=0; x<sx; x++)
+                    {
+                        outArrayY[x] *= normFactor;
+                    }
+                }
+            }
+
+            return outArray; 
         }
-
-
+                            
 
         /// <summary>
         ///  Creates a 1-dimensional Gaussian kernel of the form exp( -r^2/sigma^2 )

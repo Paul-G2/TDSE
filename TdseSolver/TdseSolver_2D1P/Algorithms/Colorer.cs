@@ -60,6 +60,7 @@ namespace TdseSolver_2D1P
             }
 
             WaveFunction.ColorDelegate colorFunc = (re, im, maxAmpl) => { return m_colorBuilder.CalcColor(re,im,maxAmpl); };
+            if (colorFunc(1, 1, 1) == Color.Empty) { colorFunc = null; }
 
             m_numFilesToProcess = vtkFiles.Length;
             int chunkSize = Environment.ProcessorCount;
@@ -73,7 +74,7 @@ namespace TdseSolver_2D1P
                     WaveFunction wf = WaveFunction.ReadFromVtkFile(inputFile);
 
                     string outFile = Path.Combine(outputDir, Path.GetFileName(inputFile));
-                    wf.SaveToVtkFile(outFile, WaveFunction.WfSaveFormat.AMPLITUDE_PHASE_AND_COLOR, colorFunc);
+                    wf.SaveToVtkFile(outFile, WaveFunction.WfSaveFormat.AMPLITUDE_AND_COLOR, colorFunc);
                 });
 
                 // Report progress to the caller
