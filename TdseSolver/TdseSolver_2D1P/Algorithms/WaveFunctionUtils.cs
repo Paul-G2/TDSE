@@ -20,8 +20,6 @@ namespace TdseSolver_2D1P
         {
             WaveFunction wf = new WaveFunction(gridSizeX, gridSizeY, latticeSpacing);
 
-            float[][] wfData = wf.Data;
-
             Complex I = Complex.I;
             float rootPi = (float) Math.Sqrt( Math.PI );
             float sigmaXSq = packetWidth.X * packetWidth.X;
@@ -33,7 +31,7 @@ namespace TdseSolver_2D1P
                 float yf = y * latticeSpacing;
                 Complex expArgY = I*yf*avgMomentum.Y - (yf - packetCenter.Y)*(yf - packetCenter.Y)/(2*sigmaYSq);
                     
-                float[] wfDataY = wfData[y];
+                float[] wfDataY = wf.Data[y];
                 for (int x = 0; x < gridSizeX; x++)
                 {
                     float xf = x * latticeSpacing;

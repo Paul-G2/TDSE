@@ -195,6 +195,21 @@ namespace TdseUtils
 
 
         /// <summary>
+        /// This method is meant to be invoked by derived classes when they wish to check whether the Pause flag has been set.
+        /// </summary>
+        protected void CheckForPause()
+        {
+            // (This method may run on a background thread.)
+
+            // Pause, if we've been requested to do so.
+            if ( !IsCancelled )
+            {
+                m_pauseSemaphore.WaitOne(); // Blocks until the pause semaphore is set.
+            }            
+        }
+
+
+        /// <summary>
         /// Gets or sets a flag indicating whether the process is running.
         /// (A paused process is considered to be running.)
         /// </summary>

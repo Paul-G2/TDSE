@@ -383,7 +383,9 @@ namespace TdseSolver_3D1P
             // Set my input dir equal to the last-used output dir
             if ( !e.Cancelled && (e.Error == null) )
             {
-                string lastOutputDir = (sender is Upsampler) ? ((Upsampler)sender).LastOutputDir :
+                string lastOutputDir = 
+                    (sender is Upsampler) ? ((Upsampler)sender).LastOutputDir :
+                    (sender is Smoother) ? ((Smoother)sender).LastOutputDir :
                     (sender is Cropper) ? ((Cropper)sender).LastOutputDir : null;
 
                 if (lastOutputDir != null) 

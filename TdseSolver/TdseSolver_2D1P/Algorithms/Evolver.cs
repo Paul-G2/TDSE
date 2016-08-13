@@ -216,7 +216,7 @@ namespace TdseSolver_2D1P
             wf.ImagPartP = temp;
 
 
-            // Compute the nezt imaginary part in terms of the current real part
+            // Compute the next imaginary part in terms of the current real part
             TdseUtils.Misc.LoopDelegate YLoop2 = (y) =>
             {
                 int yp  = (y  < sym1) ?  y + 1 : 0;
