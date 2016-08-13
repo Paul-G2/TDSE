@@ -77,7 +77,7 @@ namespace TdseSolver_2D1P
                 int iEnd = Math.Min(iStart+chunkSize, m_numFilesToProcess);
                 Parallel.For(iStart, iEnd, i=> 
                 {
-                    // Upsample one file, and save the result
+                    // Crop one file, and save the result
                     string inputFile = vtkFiles[i];
                     WaveFunction wf = WaveFunction.ReadFromVtkFile(inputFile);
                     wf = Crop( wf, m_xminCrop, m_xmaxCrop, m_yminCrop, m_ymaxCrop );

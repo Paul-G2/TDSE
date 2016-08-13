@@ -69,5 +69,18 @@ namespace TdseUtils
 
         // Declare a worker delegate needed by some methods
         public delegate void LoopDelegate(int n);
+
+
+        public static void ForLoop(int start, int end, LoopDelegate loopCode, bool multiThread)
+        {
+            if (multiThread)
+            {
+                Parallel.For(start, end, n => { loopCode(n); });
+            }
+            else
+            {
+                for (int n = start; n < end; n++) { loopCode(n); }
+            }
+        }
     }
 }

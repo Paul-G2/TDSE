@@ -10,14 +10,14 @@ using Vec3 = TdseUtils.Vec3;
 namespace TdseSolver_3D1P
 {
     /// <summary>
-    /// This is the UI control for entering the parameters that define a single run of the 
-    /// 3-dimensional, 1-particle, time-dependent Schrodinger equation solver. (3D1P TDSE).
+    /// This is the UI control for adjusting the parameters of the 3-dimensional, 
+    /// 1-particle, time-dependent Schrodinger equation solver. (3D1P TDSE).
     /// </summary>
     public partial class SolverControl : UserControl
     {
         // Class data
         RunParams      m_params         = null;
-        VCodeBuilder   m_vBuilder       = null;
+        VCodeBuilder   m_VBuilder       = null;
         Evolver        m_evolver        = null;
         int            m_lastSavedFrame = -1;
         string         m_outputDir      = "";
@@ -31,7 +31,7 @@ namespace TdseSolver_3D1P
         public SolverControl()
         {
             InitializeComponent();
-            m_vBuilder = new VCodeBuilder(); // Also loads the last-used code snippet
+            m_VBuilder = new VCodeBuilder(); // Also loads the last-used code snippet
 
             // Load the last-used params
             if ( !string.IsNullOrEmpty(Properties.Settings.Default.LastRunParams) )
@@ -60,7 +60,7 @@ namespace TdseSolver_3D1P
         private void RunStop_Btn_Click(object sender, EventArgs e)
         {
             // Sanity check the inputs
-            if (DampingBorderWidth_NUD.Value > Math.Min(GridSizeX_NUD.Value, Math.Min(GridSizeY_NUD.Value, GridSizeZ_NUD.Value)))
+            if (2*DampingBorderWidth_NUD.Value > Math.Min(GridSizeX_NUD.Value, Math.Min(GridSizeY_NUD.Value, GridSizeZ_NUD.Value)))
             {
                 MessageBox.Show("Damping border must be less than half the minimum grid dimension.");
                 return;
@@ -112,7 +112,7 @@ namespace TdseSolver_3D1P
         private void V_Btn_Click(object sender, EventArgs e)
         {
             // Launch the V-Builder dialog
-            m_vBuilder.ShowDialog();
+            m_VBuilder.ShowDialog();
         }
 
 
@@ -179,7 +179,7 @@ namespace TdseSolver_3D1P
 
             MultiThread_CheckBox.Checked = parms.MultiThread;
 
-            m_vBuilder.SetCode(parms.VCode);
+            m_VBuilder.SetCode(parms.VCode);
 
             return parms;
         }
@@ -213,13 +213,13 @@ namespace TdseSolver_3D1P
 
 
             // Create an Evolver and run it in the background
-            Evolver.VDelegate V = (x,y,z,t, m,sx,sy,sz) => { return m_vBuilder.V(x,y,z,t, m,sx,sy,sz); };
+            Evolver.VDelegate V = (x,y,z,t, m,sx,sy,sz) => { return m_VBuilder.V(x,y,z,t, m,sx,sy,sz); };
 
             m_evolver = new Evolver(wf, m_params.TotalTime, m_params.TimeStep, V, false, m_params.ParticleMass, 1, 
                 m_params.DampingBorderWidth, m_params.DampingFactor, m_params.MultiThread);
-            
             m_evolver.ProgressEvent += Evolver_ProgressEvent;
             m_evolver.CompletionEvent += Evolver_CompletionEvent;
+
             m_evolver.RunInBackground();
         }
 
@@ -248,9 +248,9 @@ namespace TdseSolver_3D1P
             int val = (100*evolver.CurrentTimeStepIndex)/(evolver.TotalNumTimeSteps);
             if (Main_ProgressBar.Value != val)
             {
-                Main_ProgressBar.Value = val;                       // Workaround for slow ProgressBar updates
-                Main_ProgressBar.Value = (val > 0) ? val - 1 : val; //
-                Main_ProgressBar.Value = val;                       //
+                Main_ProgressBar.Value = val;                 // Workaround for slow ProgressBar updates
+                Main_ProgressBar.Value = Math.Max(0, val-1);  //
+                Main_ProgressBar.Value = val;                 //
             }
         }
 
@@ -261,11 +261,11 @@ namespace TdseSolver_3D1P
         void Evolver_CompletionEvent(TdseUtils.Proc sender, RunWorkerCompletedEventArgs e)
         {
             // Update the UI
+            EnableInputs(true);
             RunStop_Btn.Text = "Run";
             PauseResume_Btn.Text = "Pause";
             PauseResume_Btn.Enabled = false;
             RunStop_Btn.Enabled = true;
-            EnableInputs(true);
 
             if (e.Cancelled)
             {

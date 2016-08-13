@@ -62,6 +62,7 @@
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
       <DependentUpon>Settings.settings</DependentUpon>
     </Compile>
+    <Compile Include="Vec2.cs" />
     <Compile Include="Vec3.cs" />
   </ItemGroup>
   <ItemGroup>
