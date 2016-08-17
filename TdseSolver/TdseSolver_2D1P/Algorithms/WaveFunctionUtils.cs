@@ -26,7 +26,7 @@ namespace TdseSolver_2D1P
             float sigmaYSq = packetWidth.Y * packetWidth.Y;
             float norm = (float) Math.Sqrt( (packetWidth.X/(rootPi*sigmaXSq)) * (packetWidth.Y/(rootPi*sigmaYSq)) );
 
-            TdseUtils.Misc.LoopDelegate YLoop = (y) =>
+            TdseUtils.Misc.ForLoop(0, gridSizeY, (y) =>
             {                
                 float yf = y * latticeSpacing;
                 Complex expArgY = I*yf*avgMomentum.Y - (yf - packetCenter.Y)*(yf - packetCenter.Y)/(2*sigmaYSq);
@@ -42,15 +42,7 @@ namespace TdseSolver_2D1P
                     wfDataY[2*x]   = wfVal.Re;
                     wfDataY[2*x+1] = wfVal.Im;
                 }             
-            };
-            if (multiThread)
-            {
-                Parallel.For(0, gridSizeY, y => { YLoop(y); });
-            }
-            else
-            {
-                for (int y = 0; y < gridSizeY; y++) { YLoop(y); }
-            }
+            }, multiThread);
 
             wf.Normalize();
             return wf;

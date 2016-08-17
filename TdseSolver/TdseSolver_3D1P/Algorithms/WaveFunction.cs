@@ -96,7 +96,7 @@ namespace TdseSolver_3D1P
                 int ny = (nz > 0) ? m_data[0].Length : 0;
                 int nx = (ny > 0) ? m_data[0][0].Length/2 : 0;
 
-                return new GridSpec(nz,ny,nx);
+                return new GridSpec(nx,ny,nz);
             }
         }
 
@@ -203,7 +203,7 @@ namespace TdseSolver_3D1P
 
 
             // Compute H * Wf
-            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.ForLoop(0, sz, (z) =>
             {
                 int zp  = (z  < szm1) ?  z + 1 : 0;
                 int zpp = (zp < szm1) ? zp + 1 : 0;
@@ -259,15 +259,7 @@ namespace TdseSolver_3D1P
                         outWf_z_y[ix] = kI + vI;
                     }
                 }
-            };
-            if (multiThread)
-            {
-                Parallel.For(0, sz, z => { ZLoop(z); });
-            }
-            else
-            {
-                for (int z = 0; z < sz; z++) { ZLoop(z); }
-            }
+            }, multiThread );
 
             return outWf;
         }

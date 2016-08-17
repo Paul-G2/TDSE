@@ -19,7 +19,7 @@ namespace TdseSolver_3D1P
         /// <summary>
         /// Constructor.
         /// </summary>
-        public GridSpec(int sizeZ, int sizeY, int sizeX)
+        public GridSpec(int sizeX, int sizeY, int sizeZ)
         {
             SizeX = sizeX;
             SizeY = sizeY;

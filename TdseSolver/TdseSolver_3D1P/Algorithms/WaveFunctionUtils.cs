@@ -32,7 +32,7 @@ namespace TdseSolver_3D1P
             float sigmaZSq = packetWidth.Z * packetWidth.Z;
             float norm = (float) Math.Sqrt( (packetWidth.X/(rootPi*sigmaXSq)) * (packetWidth.Y/(rootPi*sigmaYSq)) * (packetWidth.Z/(rootPi*sigmaZSq)) );
 
-            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.ForLoop(0, sz, (z) =>
             {
                 float zf = z * latticeSpacing;
                 Complex expArgZ = I*zf*avgMomentum.Z - (zf - packetCenter.Z)*(zf - packetCenter.Z)/(2*sigmaZSq);
@@ -54,15 +54,7 @@ namespace TdseSolver_3D1P
                         wfDataZY[2*x+1] = wfVal.Im;
                     }
                 }
-            };
-            if (multiThread)
-            {
-                Parallel.For(0, sz, z => { ZLoop(z); });
-            }
-            else
-            {
-                for (int z = 0; z < sz; z++) { ZLoop(z); }
-            }
+            }, multiThread );
 
             wf.Normalize();
             return wf;

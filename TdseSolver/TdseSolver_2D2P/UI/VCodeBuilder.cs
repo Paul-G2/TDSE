@@ -221,7 +221,7 @@ namespace TdseSolver_2D2P
                     "                                                                                                    \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "//                                                                                                  \n" +
-                    "// This method calculates the potential energy at a given location and time.                        \n" +
+                    "// This method calculates the potential energy at a given location.                                 \n" +
                     "//                                                                                                  \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "                                                                                                    \n" +
@@ -244,7 +244,7 @@ namespace TdseSolver_2D2P
                     "                                                                                                    \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "//                                                                                                  \n" +
-                    "// This method calculates the potential energy at a given location and time.                        \n" +
+                    "// This method calculates the potential energy at a given location.                                 \n" +
                     "//                                                                                                  \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "                                                                                                    \n" +
