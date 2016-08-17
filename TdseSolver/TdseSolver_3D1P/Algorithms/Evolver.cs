@@ -131,7 +131,7 @@ namespace TdseSolver_3D1P
             float domainSizeY = sy * a;
             float domainSizeZ = sz * a;
 
-            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.ForLoop(0, sz, (z) =>
             {
                 for (int y = 0; y < sy; y++)
                 {
@@ -141,15 +141,7 @@ namespace TdseSolver_3D1P
                         Vzy[x] = m_potential(x*a, y*a, z*a, time, m_particleMass, domainSizeX, domainSizeY, domainSizeZ);
                     }
                 }
-            };
-            if (m_multiThread)
-            {
-                Parallel.For(0, sz, z => { ZLoop(z); });
-            }
-            else
-            {
-                for (int z = 0; z < sz; z++) { ZLoop(z); }
-            }
+            }, m_multiThread );
 
             return V;
         }
@@ -173,7 +165,7 @@ namespace TdseSolver_3D1P
 
 
             // Compute the next real part in terms of the current imaginary part
-            TdseUtils.Misc.LoopDelegate ZLoop1 = (z) =>
+            TdseUtils.Misc.ForLoop(0, sz, (z) =>
             {
                 int zp  = (z  < szm1) ?  z + 1 : 0;
                 int zpp = (zp < szm1) ? zp + 1 : 0;
@@ -218,15 +210,7 @@ namespace TdseSolver_3D1P
                         wfR_z_y[x] += m_deltaT * (ke + pe);
                     }
                 }
-            };
-            if (m_multiThread)
-            {
-                Parallel.For(0, sz, z => { ZLoop1(z); });
-            }
-            else
-            {
-                for (int z = 0; z < sz; z++) { ZLoop1(z); }
-            }
+            }, m_multiThread );
 
 
             // Swap prev and post imaginary parts
@@ -236,7 +220,7 @@ namespace TdseSolver_3D1P
 
 
             // Compute the next imaginary part in terms of the current real part
-            TdseUtils.Misc.LoopDelegate ZLoop2 = (z) =>
+            TdseUtils.Misc.ForLoop(0, sz, (z) =>
             {
                 int zp  = (z  < szm1) ?  z + 1 : 0;
                 int zpp = (zp < szm1) ? zp + 1 : 0;
@@ -282,15 +266,7 @@ namespace TdseSolver_3D1P
                         wfIP_z_y[x] = wfIM_z_y[x] - m_deltaT * (ke + pe);
                     }
                 }
-            };
-            if (m_multiThread)
-            {
-                Parallel.For(0, sz, z => { ZLoop2(z); });
-            }
-            else
-            {
-                for (int z = 0; z < sz; z++) { ZLoop2(z); }
-            }
+            }, m_multiThread );
 
 
             // Optionally perform damping to suppress reflection and transmission at the borders. 

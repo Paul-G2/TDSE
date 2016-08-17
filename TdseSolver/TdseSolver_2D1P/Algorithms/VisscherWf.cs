@@ -56,7 +56,7 @@ namespace TdseSolver_2D1P
             float halfDt = dt/2;
             float eighthDt2 = dt*dt/8;
 
-            TdseUtils.Misc.LoopDelegate YLoop = (y) =>
+            TdseUtils.Misc.ForLoop(0, sy, (y) =>
             {
                 float[] imPY      = this.ImagPartP[y];
                 float[] imMY      = this.ImagPartM[y];
@@ -77,15 +77,7 @@ namespace TdseSolver_2D1P
                     imMY[x] = dt0Term + dt1Term - dt2Term; // [1 + i*H*(dt/2) - (1/2)H^2*(dt/2)^2] * Psi
                 }
                 
-            };
-            if (multiThread)
-            {
-                Parallel.For(0, sy, y => { YLoop(y); });
-            }
-            else
-            {
-                for (int y = 0; y < sy; y++) { YLoop(y); }
-            }            
+            }, multiThread );           
         }
 
 
@@ -123,7 +115,7 @@ namespace TdseSolver_2D1P
 
             WaveFunction result = new WaveFunction(sx, sy, LatticeSpacing);
 
-            TdseUtils.Misc.LoopDelegate YLoop = (y) =>
+            TdseUtils.Misc.ForLoop(0, sy, (y) =>
             {
                 float[] thisRy  = RealPart[y];
                 float[] thisIMy = ImagPartM[y];
@@ -152,15 +144,7 @@ namespace TdseSolver_2D1P
 
                     outWfy[2*x+1] = Iout;
                 }
-            };
-            if (multiThread)
-            {
-                Parallel.For(0, sy, y => { YLoop(y); });
-            }
-            else
-            {
-                for (int y = 0; y < sy; y++) { YLoop(y); }
-            }            
+            }, multiThread );           
 
             return result;
         }

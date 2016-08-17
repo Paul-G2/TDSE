@@ -58,7 +58,7 @@ namespace TdseSolver_3D1P
             float halfDt = dt/2;
             float eighthDt2 = dt*dt/8;
 
-            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.ForLoop(0, sz, (z) =>
             {
                 for (int y = 0; y < sy; y++)
                 {
@@ -81,15 +81,7 @@ namespace TdseSolver_3D1P
                         imMZY[x] = dt0Term + dt1Term - dt2Term; // [1 + i*H*(dt/2) - (1/2)H^2*(dt/2)^2] * Psi
                     }
                 }
-            };
-            if (multiThread)
-            {
-                Parallel.For(0, sz, z => { ZLoop(z); });
-            }
-            else
-            {
-                for (int z = 0; z < sz; z++) { ZLoop(z); }
-            }            
+            }, multiThread );           
         }
 
 
@@ -100,9 +92,9 @@ namespace TdseSolver_3D1P
         {
             get
             {
-                int nx = RealPart.Length;
-                int ny = (nx> 0) ? RealPart[0].Length : 0;
-                int nz = ((nx > 0) && (ny > 0)) ? RealPart[0][0].Length : 0;
+                int nz = RealPart.Length;
+                int ny = (nz > 0) ? RealPart[0].Length : 0;
+                int nx = (ny > 0) ? RealPart[0][0].Length : 0;
 
                 return new GridSpec(nx,ny,nz);
             }
@@ -120,7 +112,7 @@ namespace TdseSolver_3D1P
 
             WaveFunction result = new WaveFunction(GridSpec, LatticeSpacing);
 
-            TdseUtils.Misc.LoopDelegate ZLoop = (z) =>
+            TdseUtils.Misc.ForLoop(0, sz, (z) =>
             {
                 for (int y = 0; y < sy; y++)
                 {
@@ -152,15 +144,7 @@ namespace TdseSolver_3D1P
                         outWfzy[2*x+1] = Iout;
                     }
                 }
-            };
-            if (multiThread)
-            {
-                Parallel.For(0, sz, z => { ZLoop(z); });
-            }
-            else
-            {
-                for (int z = 0; z < sz; z++) { ZLoop(z); }
-            }            
+            }, multiThread );           
 
             return result;
         }

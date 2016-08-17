@@ -128,22 +128,14 @@ namespace TdseSolver_2D1P
             float domainSizeX = sx * a;
             float domainSizeY = sy * a;
 
-            TdseUtils.Misc.LoopDelegate YLoop = (y) =>
+            TdseUtils.Misc.ForLoop(0, sy, (y) =>
             {
                 float[] Vy = V[y];
                 for (int x = 0; x < sx; x++)
                 {
                     Vy[x] = m_potential(x*a, y*a, time, m_particleMass, domainSizeX, domainSizeY);
                 }
-            };
-            if (m_multiThread)
-            {
-                Parallel.For(0, sy, y => { YLoop(y); });
-            }
-            else
-            {
-                for (int y = 0; y < sy; y++) { YLoop(y); }
-            }
+            }, m_multiThread );
 
             return V;
         }
@@ -166,7 +158,7 @@ namespace TdseSolver_2D1P
             float delta = 1.0f / 12.0f;
 
             // Compute the next real part in terms of the current imaginary part
-            TdseUtils.Misc.LoopDelegate YLoop1 = (y) =>
+            TdseUtils.Misc.ForLoop(0, sy, (y) =>
             {
                 int yp  = (y  < sym1) ?  y + 1 : 0;
                 int ypp = (yp < sym1) ? yp + 1 : 0;
@@ -199,15 +191,7 @@ namespace TdseSolver_2D1P
 
                     wfR_y[x] += m_deltaT * (ke + pe);
                 }
-            };
-            if (m_multiThread)
-            {
-                Parallel.For(0, sy, y => { YLoop1(y); });
-            }
-            else
-            {
-                for (int y = 0; y < sy; y++) { YLoop1(y); }
-            }
+            }, m_multiThread );
 
 
             // Swap prev and post imaginary parts
@@ -217,7 +201,7 @@ namespace TdseSolver_2D1P
 
 
             // Compute the next imaginary part in terms of the current real part
-            TdseUtils.Misc.LoopDelegate YLoop2 = (y) =>
+            TdseUtils.Misc.ForLoop(0, sy, (y) =>
             {
                 int yp  = (y  < sym1) ?  y + 1 : 0;
                 int ypp = (yp < sym1) ? yp + 1 : 0;
@@ -251,15 +235,7 @@ namespace TdseSolver_2D1P
 
                     wfIP_y[x] = wfIM_y[x] - m_deltaT * (ke + pe);
                 }
-            };
-            if (m_multiThread)
-            {
-                Parallel.For(0, sy, y => { YLoop2(y); });
-            }
-            else
-            {
-                for (int y = 0; y < sy; y++) { YLoop2(y); }
-            }
+            }, m_multiThread );
 
 
             // Optionally perform damping to suppress reflection and transmission at the borders. 

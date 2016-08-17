@@ -71,7 +71,7 @@ namespace TdseSolver_2D2P
             }
 
             m_numFilesToProcess = vtkFiles.Length;
-            int chunkSize = 1;/////////////////////////////////////////////////////////////////////////Environment.ProcessorCount;
+            int chunkSize = Environment.ProcessorCount;
             for (int iStart = 0; iStart < m_numFilesToProcess; iStart += chunkSize)
             {
                 int iEnd = Math.Min(iStart+chunkSize, m_numFilesToProcess);

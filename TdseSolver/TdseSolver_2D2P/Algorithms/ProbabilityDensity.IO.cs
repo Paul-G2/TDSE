@@ -26,37 +26,27 @@ namespace TdseSolver_2D2P
         /// </summary>
         public static void SaveToVtkFile(ProbabilityDensity[] probs, string fileSpec)
         {
-            unsafe
+            using (FileStream fileStream = File.Create(fileSpec))
             {
-                using (FileStream fileStream = File.Create(fileSpec))
+                using (BinaryWriter bw = new BinaryWriter(fileStream))
                 {
-                    using (BinaryWriter bw = new BinaryWriter(fileStream))
+                    int sx = probs[0].GridSizeX;
+                    int sy = probs[0].GridSizeY;
+                    string nl = Environment.NewLine;
+
+                    // Write the header
+                    bw.Write(Encoding.ASCII.GetBytes("# vtk DataFile Version 3.0" + nl));
+                    bw.Write(Encoding.ASCII.GetBytes("Probability2D2P " + "spacing: " + probs[0].LatticeSpacing.ToString() + nl));
+                    bw.Write(Encoding.ASCII.GetBytes("BINARY" + nl));
+                    bw.Write(Encoding.ASCII.GetBytes("DATASET STRUCTURED_POINTS" + nl));
+                    bw.Write(Encoding.ASCII.GetBytes("DIMENSIONS " + sx + " " + sy + " 1" + nl));
+                    bw.Write(Encoding.ASCII.GetBytes("ORIGIN 0 0 0" + nl));
+                    bw.Write(Encoding.ASCII.GetBytes("SPACING 1 1 1" + nl));
+                    bw.Write(Encoding.ASCII.GetBytes("POINT_DATA " +  sx*sy + nl));
+
+                    for (int i=0; i<probs.Length; i++)
                     {
-                        int sx = probs[0].GridSizeX;
-                        int sy = probs[0].GridSizeY;
-                        string nl = Environment.NewLine;
-
-                        // For performance, we keep a temporary float value with pointers to its bytes
-                        float floatVal = 0.0f;
-                        byte* floatBytes0 = (byte*)(&floatVal);
-                        byte* floatBytes1 = floatBytes0 + 1;
-                        byte* floatBytes2 = floatBytes0 + 2;
-                        byte* floatBytes3 = floatBytes0 + 3;
-
-                        // Write the header
-                        bw.Write(Encoding.ASCII.GetBytes("# vtk DataFile Version 3.0" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("Probability2D2P " + "spacing: " + probs[0].LatticeSpacing.ToString() + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("BINARY" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("DATASET STRUCTURED_POINTS" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("DIMENSIONS " + sx + " " + sy + " 1" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("ORIGIN 0 0 0" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("SPACING 1 1 1" + nl));
-                        bw.Write(Encoding.ASCII.GetBytes("POINT_DATA " +  sx*sy + nl));
-
-                        for (int i=0; i<probs.Length; i++)
-                        {
-                            probs[i].ToVtkStream( bw, "prob_" + i.ToString() );
-                        }
+                        probs[i].ToVtkStream(bw, "prob_" + i.ToString());
                     }
                 }
             }
@@ -105,12 +95,12 @@ namespace TdseSolver_2D2P
             }
         }
 
+
         /// <summary>
         /// Reads probabilty densities from a vtk file.
         /// </summary>
         public static ProbabilityDensity[] ReadFromVtkFile(string fileSpec)
         {
-
             int sx = -1;
             int sy = -1;
             float latticeSpacing = 0.0f;
@@ -185,10 +175,6 @@ namespace TdseSolver_2D2P
                     float[] dataY = result.Data[y];
                     for (int x = 0; x < sizeX; x++)
                     {
-                        if ((n<0) || (n>=bytePlane.Length-3)) 
-                        {
-                            n = -1;
-                        }
                         *floatBytes3 = bytePlane[n];
                         *floatBytes2 = bytePlane[n+1];
                         *floatBytes1 = bytePlane[n+2];

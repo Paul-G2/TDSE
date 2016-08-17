@@ -204,7 +204,7 @@ namespace TdseSolver_2D1P
 
 
             // Compute H * Wf
-            TdseUtils.Misc.LoopDelegate YLoop = (y) =>
+            TdseUtils.Misc.ForLoop(0, sy, (y) =>
             {
                 int yp  = (y  < sym1) ?  y + 1 : 0;
                 int ypp = (yp < sym1) ? yp + 1 : 0;
@@ -248,15 +248,7 @@ namespace TdseSolver_2D1P
                     outWf_y[rx] = kR + vR;
                     outWf_y[ix] = kI + vI;
                 }
-            };
-            if (multiThread)
-            {
-                Parallel.For(0, sy, y => { YLoop(y); });
-            }
-            else
-            {
-                for (int y = 0; y < sy; y++) { YLoop(y); }
-            }
+            }, multiThread );
 
             return outWf;
         }

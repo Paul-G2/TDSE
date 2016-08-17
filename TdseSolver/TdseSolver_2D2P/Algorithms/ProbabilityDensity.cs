@@ -112,9 +112,9 @@ namespace TdseSolver_2D2P
             {
                 float[] dataY = m_data[y];
 
-                for (int nx = 0; nx < sx; nx++)
+                for (int x = 0; x < sx; x++)
                 {
-                    norm += dataY[nx];
+                    norm += dataY[x];
                 }            
             }
 

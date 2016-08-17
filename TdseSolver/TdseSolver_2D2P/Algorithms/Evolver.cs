@@ -84,6 +84,8 @@ namespace TdseSolver_2D2P
             m_lastSavedFrame       = -1;
             m_outputDir            = outputDir;
             m_multiThread          = parms.MultiThread;
+
+            m_visscherWf           = null;
         }
 
 
@@ -425,7 +427,7 @@ namespace TdseSolver_2D2P
             double RxOffset        = R0.X + time*(P0.X/m_totalMass);
             double RyOffset        = R0.Y + time*(P0.Y/m_totalMass);
             double RxScale         = -(m_sigmaCm.X*m_sigmaCm.X)/sigmaCmFactorX;
-            double RyScale         = -(m_sigmaCm.Y*m_sigmaCm.Y)/sigmaCmFactorX;
+            double RyScale         = -(m_sigmaCm.Y*m_sigmaCm.Y)/sigmaCmFactorY;
 
 
             // Precompute the relative wavefunction probabilities
