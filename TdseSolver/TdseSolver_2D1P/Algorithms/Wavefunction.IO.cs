@@ -10,7 +10,7 @@ namespace TdseSolver_2D1P
     /// <summary>
     /// This class represents a 1-particle wavefunction in 2 dimensions, defined on a rectangular grid.
     /// </summary>
-    partial class WaveFunction
+    public partial class WaveFunction
     {
         public enum WfSaveFormat
         {

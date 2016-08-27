@@ -362,11 +362,11 @@ namespace TdseSolver_2D1P
 
             // Create a fresh direcory
             int index = 0;
-            string dir = outputDrive + ":\\" + "WfAnimations2D" + "\\" + index.ToString("D4"); 
+            string dir = outputDrive + ":\\" + "WfAnimations2D1P" + "\\" + index.ToString("D4"); 
             while ( Directory.Exists(dir) )
             {
                 index++;
-                dir = outputDrive + ":\\" + "WfAnimations2D" + "\\" + index.ToString("D4"); 
+                dir = outputDrive + ":\\" + "WfAnimations2D1P" + "\\" + index.ToString("D4"); 
             }
             try
             {

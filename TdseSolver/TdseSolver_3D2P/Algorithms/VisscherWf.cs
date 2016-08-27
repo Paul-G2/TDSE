@@ -51,7 +51,7 @@ namespace TdseSolver_3D2P
             }
 
             // For the imaginary parts, we need to compute the time evolutions.
-            // We use a power series expansion of the time-evolution operator, accurate to 2nd oder in H*dt
+            // We use a power series expansion of the time-evolution operator, accurate to 2nd order in H*dt
             WaveFunction H_PsiIn  = inputWf.ApplyH(V, mass, multiThread);
             WaveFunction H2_PsiIn = H_PsiIn.ApplyH(V, mass, multiThread);
 

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TdseSolver_2D1P", "TdseSolver_2D1P\TdseSolver_2D1P.csproj", "{A981BA08-BEA9-4D02-B029-876D390AE0A4}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -14,6 +14,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TdseSolver_3D1P", "TdseSolv
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TdseSolver_2D2P", "TdseSolver_2D2P\TdseSolver_2D2P.csproj", "{A981BA08-BEA9-4D02-B029-876D390AE093}"
+	ProjectSection(ProjectDependencies) = postProject
+		{0AC8E9DE-2CF1-4582-A341-8073B7081BA0} = {0AC8E9DE-2CF1-4582-A341-8073B7081BA0}
+	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TdseSolver_2D2P_NS", "TdseSolver_2D2P_NS\TdseSolver_2D2P_NS.csproj", "{A981BA08-BEA9-4D02-B029-654D390AE093}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0AC8E9DE-2CF1-4582-A341-8073B7081BA0} = {0AC8E9DE-2CF1-4582-A341-8073B7081BA0}
 	EndProjectSection
@@ -65,6 +70,16 @@ Global
 		{A981BA08-BEA9-4D02-B029-876D390AE093}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{A981BA08-BEA9-4D02-B029-876D390AE093}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{A981BA08-BEA9-4D02-B029-876D390AE093}.Release|Win32.ActiveCfg = Release|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{A981BA08-BEA9-4D02-B029-654D390AE093}.Release|Win32.ActiveCfg = Release|Any CPU
 		{A981BA08-BEA9-4D02-B029-876D390AE011}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A981BA08-BEA9-4D02-B029-876D390AE011}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A981BA08-BEA9-4D02-B029-876D390AE011}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU

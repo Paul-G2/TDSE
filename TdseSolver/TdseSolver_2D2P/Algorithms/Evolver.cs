@@ -316,7 +316,7 @@ namespace TdseSolver_2D2P
         }
 
         /// <summary>
-        /// Damps the wavefunction apmlitude near the region boundary.
+        /// Damps the wavefunction amplitude near the region boundary.
         /// </summary>
         private void ApplyDamping(VisscherWf wf)
         {

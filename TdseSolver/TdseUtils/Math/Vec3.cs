@@ -1,17 +1,17 @@
 ﻿using System;
-using System.Drawing;
 
 
 namespace TdseUtils
 {
     /// <summary>
-    /// This class represents a 2-component, single-precision vector.
+    /// This class represents a 3-component, single-precision vector.
     /// </summary>
-    public class Vec2 
+    public class Vec3 
     {
         #region Class data
         public float X;
         public float Y;
+        public float Z;
         #endregion Class data
 
 
@@ -19,10 +19,11 @@ namespace TdseUtils
         /// Constructor. 
         /// Creates a vector with all elements initialized to zero. 
         /// </summary>
-        public Vec2()
+        public Vec3()
         {
             X = 0.0f;
             Y = 0.0f;
+            Z = 0.0f;
         }
 
 
@@ -30,10 +31,11 @@ namespace TdseUtils
         /// Constructor. 
         /// Creates a vector with specified component values. 
         /// </summary>
-        public Vec2(float x, float y)
+        public Vec3(float x, float y, float z)
         {
             X = x;
             Y = y;
+            Z = z;
         }
 
 
@@ -41,143 +43,54 @@ namespace TdseUtils
         /// Constructor. 
         /// Creates a vector with specified component values. 
         /// </summary>
-        public Vec2(double x, double y)
+        public Vec3(double x, double y, double z)
         {
-            X = (float)x;
-            Y = (float)y;
-        }
-
-
-        /// <summary>
-        /// Constructor.
-        /// Creates a Vec2 from a PointF.
-        /// </summary>
-        public Vec2(PointF src)
-        {
-            X = src.X;
-            Y = src.Y;
-        }
-
-
-        /// <summary>
-        /// Constructor.
-        /// Creates a Vec2 from a Point.
-        /// </summary>
-        public Vec2(Point src)
-        {
-            X = src.X;
-            Y = src.Y;
+            X = (float) x;
+            Y = (float) y;
+            Z = (float) z;
         }
 
 
         /// <summary>
         /// Constructor.
         /// </summary>
-        public Vec2(float[] array)
+        public Vec3(float[] array)
         {
-            if ( (array == null) || (array.Length != 2) )
+            if ( (array == null) || (array.Length != 3) )
             {
-                throw new ArgumentException("Invalid array passed to Vec2 constructor.");
+                throw new ArgumentException("Invalid array passed to Vec3 constructor.");
             }
 
             X = array[0];
             Y = array[1];
+            Z = array[2];
+        }
+
+
+        /// <summary>
+        /// Constructor.
+        /// </summary>
+        public Vec3(double[] array)
+        {
+            if ( (array == null) || (array.Length != 3) )
+            {
+                throw new ArgumentException("Invalid array passed to Vec3 constructor.");
+            }
+
+            X = (float) array[0];
+            Y = (float) array[1];
+            Z = (float) array[2];
         }
 
 
         /// <summary>
         /// Copy constructor.
         /// </summary>
-        public Vec2(Vec2 src)
+        public Vec3(Vec3 src)
         {
             X = src.X;
             Y = src.Y;
-        }
-
-
-        /// <summary>
-        /// Converts the Vec2 to a PointF.
-        /// </summary>
-        public PointF ToPointF()
-        {
-            return new PointF( X, Y );
-        }
-
-
-        /// <summary>
-        /// Converts the Vec2 to a Point.
-        /// </summary>
-        public Point ToPoint()
-        {
-            return new Point( (int)Math.Round(X), (int)Math.Round(Y) );
-        }
-
-
-        /// <summary>
-        /// Converts an array of Vec2's to an array of PointF's.
-        /// </summary>
-        public static PointF[] ToPointFArray( Vec2[] inArray )
-        {
-            if (inArray == null) { return null; }
-
-            int N = inArray.Length;
-            PointF[] outArray = new PointF[N];
-            for (int i=0; i<N; i++)
-            {
-                outArray[i] = inArray[i].ToPointF();
-            }
-            return outArray;
-        }
-
-
-        /// <summary>
-        /// Converts an array of Vec2's to an array of Points.
-        /// </summary>
-        public static Point[] ToPointArray( Vec2[] inArray )
-        {
-            if (inArray == null) { return null; }
-
-            int N = inArray.Length;
-            Point[] outArray = new Point[N];
-            for (int i=0; i<N; i++)
-            {
-                outArray[i] = inArray[i].ToPoint();
-            }
-            return outArray;
-        }
-
-
-        /// <summary>
-        /// Converts an array of PointF's to an array of Vec2's.
-        /// </summary>
-        public static Vec2[] ToVec2Array( PointF[] inArray )
-        {
-            if (inArray == null) { return null; }
-
-            int N = inArray.Length;
-            Vec2[] outArray = new Vec2[N];
-            for (int i=0; i<N; i++)
-            {
-                outArray[i] = new Vec2( inArray[i] );
-            }
-            return outArray;
-        }
-
-
-        /// <summary>
-        /// Converts an array of Point's to an array of Vec2's.
-        /// </summary>
-        public static Vec2[] ToVec2Array( Point[] inArray )
-        {
-            if (inArray == null) { return null; }
-
-            int N = inArray.Length;
-            Vec2[] outArray = new Vec2[N];
-            for (int i=0; i<N; i++)
-            {
-                outArray[i] = new Vec2( inArray[i] );
-            }
-            return outArray;
+            Z = src.Z;
         }
 
 
@@ -196,6 +109,10 @@ namespace TdseUtils
                 {
                     return Y;
                 }
+                else if (indx == 2)
+                {
+                    return Z;
+                }
                 else
                 {
                     throw new ArgumentException("Invalid argument passed to Vec2 index operator.");
@@ -212,38 +129,52 @@ namespace TdseUtils
                 {
                     Y = value;
                 }
+                else if (indx == 2)
+                {
+                    Z = value;
+                }
                 else
                 {
                     throw new ArgumentException("Invalid argument passed to Vec2 index operator.");
                 }
             }
+
         }
         
 
         /// <summary>
         /// The zero vector.
         /// </summary>
-        public static Vec2 Zero
+        public static Vec3 Zero
         {
-            get { return new Vec2(0.0f, 0.0f); }
+            get { return new Vec3(0.0f, 0.0f, 0.0f); }
         }
 
 
         /// <summary>
         /// The unit vector in the x-direction.
         /// </summary>
-        public static Vec2 UnitX
+        public static Vec3 UnitX
         {
-            get { return new Vec2( 1.0f, 0.0f ); }
+            get { return new Vec3( 1.0f, 0.0f, 0.0f ); }
         }
 
 
         /// <summary>
         /// The unit vector in the y-direction.
         /// </summary>
-        public static Vec2 UnitY
+        public static Vec3 UnitY
         {
-            get { return new Vec2( 0.0f, 1.0f ); }
+            get { return new Vec3( 0.0f, 1.0f, 0.0f ); }
+        }
+
+
+        /// <summary>
+        /// The unit vector in the z-direction.
+        /// </summary>
+        public static Vec3 UnitZ
+        {
+            get { return new Vec3( 0.0f, 0.0f, 1.0f ); }
         }
 
 
@@ -251,7 +182,7 @@ namespace TdseUtils
         /// Indicates whether this Vector is equal to another one, within
         /// a given tolerance.
         /// </summary>
-        public bool ValueEquals(Vec2 that, float tolerance = 0.0f)
+        public bool ValueEquals(Vec3 that, float tolerance = 0.0f)
         {
             if ( ReferenceEquals(this, that) ) {  return true; }
 
@@ -259,101 +190,93 @@ namespace TdseUtils
 
             if (Math.Abs(this.X - that.X) > tolerance) { return false; }
             if (Math.Abs(this.Y - that.Y) > tolerance) { return false; }
+            if (Math.Abs(this.Z - that.Z) > tolerance) { return false; }
 
             return true;
         }
 
-
-        /// <summary>
-        /// Copies the data from another vector into this one.
-        /// </summary>
-        public void CopyDataFrom(Vec2 other)
-        {
-            X = other.X;
-            Y = other.Y;
-        }
-
-
         /// <summary>
         /// Negation operator. Returns a vector that is the negative of the given one.
         /// </summary>
-        public static Vec2 operator-(Vec2 value)
+        public static Vec3 operator-(Vec3 value)
         {
-            return new Vec2(-value.X, -value.Y);
+            return new Vec3(-value.X, -value.Y, -value.Z);
         }
         
         
         /// <summary>
-        /// Addition operator
+        /// Addition operator.
         /// </summary>
-        public static Vec2 operator +(Vec2 A, Vec2 B)
+        public static Vec3 operator +(Vec3 A, Vec3 B)
         {
-            return  new Vec2(A.X + B.X,  A.Y + B.Y);
+            return  new Vec3(A.X + B.X,  A.Y + B.Y,  A.Z + B.Z);
         }
 
         
         /// <summary>
         /// In-place addition.
         /// </summary>
-        public void Add(Vec2 that)
+        public void Add(Vec3 that)
         {
             X += that.X;
             Y += that.Y;
+            Z += that.Z;
         }
         
         
         /// <summary>
-        /// Subtraction operator
+        /// Subtraction operator.
         /// </summary>
-        public static Vec2 operator -(Vec2 A, Vec2 B)
+        public static Vec3 operator -(Vec3 A, Vec3 B)
         {
-            return  new Vec2(A.X - B.X,  A.Y - B.Y);
+            return  new Vec3(A.X - B.X,  A.Y - B.Y,  A.Z - B.Z);
         }
 
 
         /// <summary>
         /// In-place subtraction.
         /// </summary>
-        public void Subtract(Vec2 that)
+        public void Subtract(Vec3 that)
         {
             X -= that.X;
             Y -= that.Y;
-        }
-        
-        
-        /// <summary>
-        /// Multiplication by a scalar.
-        /// </summary>
-        public static Vec2 operator *(Vec2 A, float scale)
-        {
-            return  new Vec2(scale*A.X,  scale*A.Y);
+            Z -= that.Z;
         }
 
 
         /// <summary>
         /// Multiplication by a scalar.
         /// </summary>
-        public static Vec2 operator *(Vec2 A, double scale)
+        public static Vec3 operator *(Vec3 A, float scale)
         {
-            return  new Vec2(scale*A.X,  scale*A.Y);
+            return  new Vec3(scale*A.X,  scale*A.Y,  scale*A.Z);
         }
 
 
         /// <summary>
         /// Multiplication by a scalar.
         /// </summary>
-        public static Vec2 operator *(float scale, Vec2 A)
+        public static Vec3 operator *(Vec3 A, double scale)
         {
-            return  new Vec2(scale*A.X,  scale*A.Y);
+            return  new Vec3(scale*A.X,  scale*A.Y,  scale*A.Z);
         }
 
 
         /// <summary>
         /// Multiplication by a scalar.
         /// </summary>
-        public static Vec2 operator *(double scale, Vec2 A)
+        public static Vec3 operator *(float scale, Vec3 A)
         {
-            return  new Vec2(scale*A.X,  scale*A.Y);
+            return  new Vec3(scale*A.X,  scale*A.Y,  scale*A.Z);
+        }
+
+
+        /// <summary>
+        /// Multiplication by a scalar.
+        /// </summary>
+        public static Vec3 operator *(double scale, Vec3 A)
+        {
+            return  new Vec3(scale*A.X,  scale*A.Y,  scale*A.Z);
         }
 
 
@@ -364,34 +287,36 @@ namespace TdseUtils
         {
             X *= scale;
             Y *= scale;
+            Z *= scale;
         }
-        
-        
+
+
         /// <summary>
         /// In-place multiplication.
         /// </summary>
         public void MultiplyBy(double scale)
         {
-            X = (float) (X*scale);
-            Y = (float) (Y*scale);
-        }
-        
-        
-        /// <summary>
-        /// Division by a scalar.
-        /// </summary>
-        public static Vec2 operator /(Vec2 A, float scale)
-        {
-            return  new Vec2(A.X/scale,  A.Y/scale);
+            X = (float) (scale * X);
+            Y = (float) (scale * Y);
+            Z = (float) (scale * Z);
         }
 
 
         /// <summary>
         /// Division by a scalar.
         /// </summary>
-        public static Vec2 operator /(Vec2 A, double scale)
+        public static Vec3 operator /(Vec3 A, float scale)
         {
-            return  new Vec2(A.X/scale,  A.Y/scale);
+            return  new Vec3(A.X/scale,  A.Y/scale,  A.Z/scale);
+        }
+
+
+        /// <summary>
+        /// Division by a scalar.
+        /// </summary>
+        public static Vec3 operator /(Vec3 A, double scale)
+        {
+            return  new Vec3(A.X/scale,  A.Y/scale,  A.Z/scale);
         }
 
 
@@ -402,33 +327,25 @@ namespace TdseUtils
         {
             X = (float) (X/scale);
             Y = (float) (Y/scale);
+            Z = (float) (Z/scale);
         }
         
         
         /// <summary>
         /// Dot product.
         /// </summary>
-        public float Dot(Vec2 that)
+        public float Dot(Vec3 that)
         {
-            return (X*that.X + Y*that.Y);
+            return (X*that.X + Y*that.Y + Z*that.Z);
         }
 
 
         /// <summary>
         /// Cross product.
         /// </summary>
-        public float Cross(Vec2 that)
+        public Vec3 Cross(Vec3 that)
         {
-             return (X*that.Y - Y*that.X);
-        }
-
-
-        /// <summary>
-        /// Creates a vector that is perpendicular to (and has the same magnitude as) this one.
-        /// </summary>
-        public Vec2 Perp()
-        {
-            return new Vec2(Y, -X);
+            return new Vec3(Y*that.Z - Z*that.Y,  Z*that.X - X*that.Z,  X*that.Y - Y*that.X);
         }
 
 
@@ -437,7 +354,7 @@ namespace TdseUtils
         /// </summary>
         public float NormSq()
         {
-            return X*X + Y*Y;
+            return X*X + Y*Y + Z*Z;
         }
 
 
@@ -446,14 +363,14 @@ namespace TdseUtils
         /// </summary>
         public float Norm()
         {
-            return (float) Math.Sqrt( X*X + Y*Y );
+            return  (float) Math.Sqrt( X*X + Y*Y + Z*Z );
         }
 
 
         /// <summary>
         /// Gets a normalized version of the Vector.
         /// </summary>
-        public Vec2 Normalized()
+        public Vec3 Normalized()
         {
             return this * ( 1.0f/Norm() );
         }
@@ -465,18 +382,6 @@ namespace TdseUtils
         public void Normalize()
         {
             this.MultiplyBy( 1.0f/Norm() );
-        }
-
-
-        /// <summary>
-        /// Gets a rotated version of the vector.
-        /// </summary>
-        public Vec2 Rotate(double angleRads)
-        {
-            double cos = Math.Cos(angleRads);
-            double sin = Math.Sin(angleRads);
-
-            return new Vec2(cos*X - sin*Y, sin*X + cos*Y);
         }
 
 
@@ -496,13 +401,14 @@ namespace TdseUtils
         {
             if ( string.IsNullOrEmpty(format) )
             {
-                return "(" + X.ToString() + ", " + Y.ToString() + ")";
+                return "(" + X.ToString() + ", " + Y.ToString() + ", " + Z.ToString() + ")";
             }
             else
             {
-                return "(" + X.ToString(format) + ", " + Y.ToString(format) + ")";
+                return "(" + X.ToString(format) + ", " + Y.ToString(format) + ", " + Z.ToString(format) + ")";
             }
         }
 
     }
 }
+
