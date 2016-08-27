@@ -9,7 +9,7 @@ namespace TdseSolver_2D1P
     /// <summary>
     /// This class provides miscellaneous utility methods for working with wavefunctions.
     /// </summary>
-    class WaveFunctionUtils
+    public class WaveFunctionUtils
     {
         /// <summary>
         /// Creates a Gaussian wavepacket with given properties.

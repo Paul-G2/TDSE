@@ -370,11 +370,11 @@ namespace TdseSolver_3D1P
 
             // Create a fresh direcory
             int index = 0;
-            string dir = outputDrive + ":\\" + "WfAnimations3D" + "\\" + index.ToString("D4"); 
+            string dir = outputDrive + ":\\" + "WfAnimations3D1P" + "\\" + index.ToString("D4"); 
             while ( Directory.Exists(dir) )
             {
                 index++;
-                dir = outputDrive + ":\\" + "WfAnimations3D" + "\\" + index.ToString("D4"); 
+                dir = outputDrive + ":\\" + "WfAnimations3D1P" + "\\" + index.ToString("D4"); 
             }
             try
             {

@@ -158,7 +158,7 @@ namespace TdseSolver_2D1P
             float delta = 1.0f / 12.0f;
 
             // Compute the next real part in terms of the current imaginary part
-            TdseUtils.Misc.ForLoop(0, sy, (y) =>
+            TdseUtils.Misc.ForLoop(0, sy, y =>
             {
                 int yp  = (y  < sym1) ?  y + 1 : 0;
                 int ypp = (yp < sym1) ? yp + 1 : 0;
@@ -180,7 +180,7 @@ namespace TdseSolver_2D1P
                     int xm  = (x  > 0) ?  x - 1 : sxm1;
                     int xmm = (xm > 0) ? xm - 1 : sxm1;
 
-                    // Discretization of the 2nd derivative that is correct to O(a^4)
+                    // A discretization of the 2nd derivative, whose error term is O(a^6)
                     float ke = keFactor * (
                         alpha * wfI_y[x] +
                         beta  * (wfI_y[xm] + wfI_y[xp] + wfI_ym[x] + wfI_yp[x]) +
@@ -201,7 +201,7 @@ namespace TdseSolver_2D1P
 
 
             // Compute the next imaginary part in terms of the current real part
-            TdseUtils.Misc.ForLoop(0, sy, (y) =>
+            TdseUtils.Misc.ForLoop(0, sy, y =>
             {
                 int yp  = (y  < sym1) ?  y + 1 : 0;
                 int ypp = (yp < sym1) ? yp + 1 : 0;
@@ -224,7 +224,7 @@ namespace TdseSolver_2D1P
                     int xm  = (x  > 0) ?  x - 1 : sxm1;
                     int xmm = (xm > 0) ? xm - 1 : sxm1;
 
-                    // Discretization of the 2nd derivative that is correct to O(a^4)
+                    // A discretization of the 2nd derivative, whose error term is O(a^6)
                     float ke = keFactor * (
                         alpha * wfR_y[x] +
                         beta  * (wfR_y[xm] + wfR_y[xp] + wfR_ym[x] + wfR_yp[x]) +
@@ -247,7 +247,7 @@ namespace TdseSolver_2D1P
         }
 
         /// <summary>
-        /// Damps the wavefunction apmlitude near the region boundary.
+        /// Damps the wavefunction amplitude near the region boundary.
         /// </summary>
         private void ApplyDamping(VisscherWf wf)
         {

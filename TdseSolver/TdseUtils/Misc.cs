@@ -47,6 +47,26 @@ namespace TdseUtils
 
 
         /// <summary>
+        /// Allocates a 3D array of floats.
+        /// </summary>
+        public static float[][][][] Allocate4DArray(int n0, int n1, int n2, int n3)
+        {
+            float[][][][] a = new float[n0][][][];
+
+            for (int i = 0; i < n0; i++) 
+            { 
+                a[i] = new float[n1][][]; 
+                for (int j = 0; j < n1; j++) 
+                { 
+                    a[i][j] = Allocate2DArray(n2, n3);
+                }
+            }
+
+            return a;
+        }
+
+
+        /// <summary>
         /// Copies a 2D array of floats.
         /// </summary>
         public static void Copy2DArray(float[][] src, float[][] dest)
@@ -82,5 +102,19 @@ namespace TdseUtils
                 for (int n = start; n < end; n++) { loopCode(n); }
             }
         }
+
+
+        public static void ForLoop(int start, int end, ParallelOptions options, LoopDelegate loopCode, bool multiThread)
+        {
+            if (multiThread)
+            {
+                Parallel.For(start, end, options, n => { loopCode(n); });
+            }
+            else
+            {
+                for (int n = start; n < end; n++) { loopCode(n); }
+            }
+        }
+
     }
 }

@@ -8,7 +8,7 @@ namespace TdseSolver_2D1P
     /// <summary>
     /// This class represents a 1-particle wavefunction in 2 dimensions, defined on a rectangular grid.
     /// </summary>
-    partial class WaveFunction
+    public partial class WaveFunction
     {
         // Class data
         float[][] m_data;   // (Re,Im) pairs, stored in [y][x] order, for compatibility with the vtk file format
@@ -35,8 +35,6 @@ namespace TdseSolver_2D1P
             m_data = data;
             m_latticeSpacing = latticeSpacing;
         }
-
-
 
 
         /// <summary>
@@ -160,6 +158,70 @@ namespace TdseSolver_2D1P
 
 
         /// <summary>
+        /// Addition operator.
+        /// </summary>
+        public static WaveFunction operator +(WaveFunction A, WaveFunction B)
+        {
+            int sx = A.GridSizeX;
+            int sy = A.GridSizeY;
+            int sx2 = 2*sx;
+
+            if ( (sx != B.GridSizeX) || (sy != B.GridSizeY) || Math.Abs(A.LatticeSpacing - B.LatticeSpacing) > 1.0e-5 )
+            {
+                throw new ArgumentException("Incompatible WaveFunctions, in WaveFunction.operator+");
+            }
+
+            WaveFunction result = new WaveFunction(sx, sy, A.LatticeSpacing);
+
+            for (int y=0; y<sy; y++)
+            {
+                float[] AdataY = A.m_data[y];
+                float[] BdataY = B.m_data[y];
+                float[] RdataY = result.m_data[y];
+
+                for (int nx = 0; nx < sx2; nx++)
+                {
+                    RdataY[nx] = AdataY[nx] + BdataY[nx];
+                }        
+            }
+            
+            return result;
+        }
+
+        
+        /// <summary>
+        /// Subtraction operator.
+        /// </summary>
+        public static WaveFunction operator -(WaveFunction A, WaveFunction B)
+        {
+            int sx = A.GridSizeX;
+            int sy = A.GridSizeY;
+            int sx2 = 2*sx;
+
+            if ( (sx != B.GridSizeX) || (sy != B.GridSizeY) || Math.Abs(A.LatticeSpacing - B.LatticeSpacing) > 1.0e-5 )
+            {
+                throw new ArgumentException("Incompatible WaveFunctions, in WaveFunction.operator+");
+            }
+
+            WaveFunction result = new WaveFunction(sx, sy, A.LatticeSpacing);
+
+            for (int y=0; y<sy; y++)
+            {
+                float[] AdataY = A.m_data[y];
+                float[] BdataY = B.m_data[y];
+                float[] RdataY = result.m_data[y];
+
+                for (int nx = 0; nx < sx2; nx++)
+                {
+                    RdataY[nx] = AdataY[nx] - BdataY[nx];
+                }        
+            }
+            
+            return result;
+        }
+
+        
+        /// <summary>
         /// Multiplies the wavefunction by a given factor.
         /// </summary>
         public void ScaleBy(float factor)
@@ -176,6 +238,86 @@ namespace TdseSolver_2D1P
                     dataY[nx] *= factor;
                 }        
             }
+        }
+
+
+        /// <summary>
+        /// Multiplication operator.
+        /// </summary>
+        public static WaveFunction operator *(double s, WaveFunction A)
+        {
+            int sx = A.GridSizeX;
+            int sy = A.GridSizeY;
+            int sx2 = 2*sx;
+            float fs = (float) s;
+
+            WaveFunction result = new WaveFunction(sx, sy, A.LatticeSpacing);
+
+            for (int y=0; y<sy; y++)
+            {
+                float[] AdataY = A.m_data[y];
+                float[] RdataY = result.m_data[y];
+
+                for (int nx = 0; nx < sx2; nx++)
+                {
+                    RdataY[nx] = AdataY[nx] * fs;
+                }        
+            }
+            
+            return result;
+        }
+
+
+        /// <summary>
+        /// Multiplication operator.
+        /// </summary>
+        public static WaveFunction operator *(WaveFunction A, double s)
+        {
+            return s * A;
+        }
+
+
+        /// <summary>
+        /// Multiplication operator.
+        /// </summary>
+        public static WaveFunction operator *(TdseUtils.Complex s, WaveFunction A)
+        {
+            int sx = A.GridSizeX;
+            int sy = A.GridSizeY;
+            int sx2 = 2*sx;
+            float sr = s.Re;
+            float si = s.Im;
+
+            WaveFunction result = new WaveFunction(sx, sy, A.LatticeSpacing);
+
+            for (int y=0; y<sy; y++)
+            {
+                float[] AdataY = A.m_data[y];
+                float[] RdataY = result.m_data[y];
+
+                for (int x = 0; x < sx; x++)
+                {
+                    int x2 = 2*x;
+                    int x2p = x2 + 1;
+
+                    float ar = AdataY[x2];
+                    float ai = AdataY[x2p];
+
+                    RdataY[x2]  = sr*ar - si*ai;
+                    RdataY[x2p] = sr*ai + si*ar;
+                }        
+            }
+            
+            return result;
+        }
+
+
+        /// <summary>
+        /// Multiplication operator.
+        /// </summary>
+        public static WaveFunction operator *(WaveFunction A, TdseUtils.Complex s)
+        {
+            return s * A;
         }
 
 
