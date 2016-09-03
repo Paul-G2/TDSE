@@ -47,6 +47,8 @@
             this.label6 = new System.Windows.Forms.Label();
             this.InitialPacketCenterX_NUD = new System.Windows.Forms.NumericUpDown();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.Mass_NUD = new System.Windows.Forms.NumericUpDown();
             this.label7 = new System.Windows.Forms.Label();
             this.InitialMomentumY_NUD = new System.Windows.Forms.NumericUpDown();
             this.label8 = new System.Windows.Forms.Label();
@@ -68,8 +70,6 @@
             this.groupBox7 = new System.Windows.Forms.GroupBox();
             this.DampingFactor_NUD = new System.Windows.Forms.NumericUpDown();
             this.label13 = new System.Windows.Forms.Label();
-            this.label15 = new System.Windows.Forms.Label();
-            this.Mass_NUD = new System.Windows.Forms.NumericUpDown();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.LatticeSpacing_NUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.GridSizeY_NUD)).BeginInit();
@@ -81,6 +81,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.InitialPacketCenterY_NUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.InitialPacketCenterX_NUD)).BeginInit();
             this.groupBox4.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Mass_NUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.InitialMomentumY_NUD)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.InitialMomentumX_NUD)).BeginInit();
             this.groupBox5.SuspendLayout();
@@ -91,7 +92,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.DampingBorderWidth_NUD)).BeginInit();
             this.groupBox7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DampingFactor_NUD)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Mass_NUD)).BeginInit();
             this.SuspendLayout();
             // 
             // V_Btn
@@ -165,7 +165,7 @@
             this.LatticeSpacing_NUD.TabIndex = 3;
             this.LatticeSpacing_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.LatticeSpacing_NUD.Value = new decimal(new int[] {
-            10,
+            20,
             0,
             0,
             65536});
@@ -188,7 +188,7 @@
             this.GridSizeY_NUD.TabIndex = 3;
             this.GridSizeY_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.GridSizeY_NUD.Value = new decimal(new int[] {
-            256,
+            128,
             0,
             0,
             0});
@@ -220,7 +220,7 @@
             this.GridSizeX_NUD.TabIndex = 1;
             this.GridSizeX_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.GridSizeX_NUD.Value = new decimal(new int[] {
-            256,
+            128,
             0,
             0,
             0});
@@ -267,7 +267,7 @@
             this.InitialPacketSizeY_NUD.TabIndex = 3;
             this.InitialPacketSizeY_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.InitialPacketSizeY_NUD.Value = new decimal(new int[] {
-            10,
+            20,
             0,
             0,
             0});
@@ -300,7 +300,7 @@
             this.InitialPacketSizeX_NUD.TabIndex = 1;
             this.InitialPacketSizeX_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.InitialPacketSizeX_NUD.Value = new decimal(new int[] {
-            10,
+            20,
             0,
             0,
             0});
@@ -341,7 +341,7 @@
             this.InitialPacketCenterY_NUD.TabIndex = 3;
             this.InitialPacketCenterY_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.InitialPacketCenterY_NUD.Value = new decimal(new int[] {
-            40,
+            60,
             0,
             0,
             0});
@@ -369,7 +369,7 @@
             this.InitialPacketCenterX_NUD.TabIndex = 1;
             this.InitialPacketCenterX_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.InitialPacketCenterX_NUD.Value = new decimal(new int[] {
-            40,
+            60,
             0,
             0,
             0});
@@ -389,6 +389,45 @@
             this.groupBox4.TabIndex = 18;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Initial momentum";
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Location = new System.Drawing.Point(203, 30);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(35, 13);
+            this.label15.TabIndex = 6;
+            this.label15.Text = "Mass:";
+            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
+            // Mass_NUD
+            // 
+            this.Mass_NUD.DecimalPlaces = 1;
+            this.Mass_NUD.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.Mass_NUD.Location = new System.Drawing.Point(240, 27);
+            this.Mass_NUD.Maximum = new decimal(new int[] {
+            999,
+            0,
+            0,
+            0});
+            this.Mass_NUD.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.Mass_NUD.Name = "Mass_NUD";
+            this.Mass_NUD.Size = new System.Drawing.Size(56, 20);
+            this.Mass_NUD.TabIndex = 5;
+            this.Mass_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
+            this.Mass_NUD.Value = new decimal(new int[] {
+            10,
+            0,
+            0,
+            65536});
             // 
             // label7
             // 
@@ -419,10 +458,10 @@
             this.InitialMomentumY_NUD.TabIndex = 3;
             this.InitialMomentumY_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.InitialMomentumY_NUD.Value = new decimal(new int[] {
-            5,
+            25,
             0,
             0,
-            65536});
+            131072});
             // 
             // label8
             // 
@@ -452,10 +491,10 @@
             this.InitialMomentumX_NUD.TabIndex = 1;
             this.InitialMomentumX_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.InitialMomentumX_NUD.Value = new decimal(new int[] {
-            5,
+            25,
             0,
             0,
-            65536});
+            131072});
             // 
             // groupBox5
             // 
@@ -540,7 +579,7 @@
             this.TotalTime_NUD.TabIndex = 4;
             this.TotalTime_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
             this.TotalTime_NUD.Value = new decimal(new int[] {
-            1000,
+            500,
             0,
             0,
             0});
@@ -581,7 +620,7 @@
             1,
             0,
             0,
-            131072});
+            65536});
             // 
             // groupBox6
             // 
@@ -709,45 +748,6 @@
             this.label13.TabIndex = 25;
             this.label13.Text = "Factor :";
             // 
-            // label15
-            // 
-            this.label15.AutoSize = true;
-            this.label15.Location = new System.Drawing.Point(203, 30);
-            this.label15.Name = "label15";
-            this.label15.Size = new System.Drawing.Size(35, 13);
-            this.label15.TabIndex = 6;
-            this.label15.Text = "Mass:";
-            this.label15.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
-            // 
-            // Mass_NUD
-            // 
-            this.Mass_NUD.DecimalPlaces = 1;
-            this.Mass_NUD.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.Mass_NUD.Location = new System.Drawing.Point(240, 27);
-            this.Mass_NUD.Maximum = new decimal(new int[] {
-            999,
-            0,
-            0,
-            0});
-            this.Mass_NUD.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.Mass_NUD.Name = "Mass_NUD";
-            this.Mass_NUD.Size = new System.Drawing.Size(56, 20);
-            this.Mass_NUD.TabIndex = 5;
-            this.Mass_NUD.TextAlign = System.Windows.Forms.HorizontalAlignment.Center;
-            this.Mass_NUD.Value = new decimal(new int[] {
-            10,
-            0,
-            0,
-            65536});
-            // 
             // SolverControl
             // 
             this.AllowDrop = true;
@@ -780,6 +780,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.InitialPacketCenterX_NUD)).EndInit();
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Mass_NUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.InitialMomentumY_NUD)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.InitialMomentumX_NUD)).EndInit();
             this.groupBox5.ResumeLayout(false);
@@ -793,7 +794,6 @@
             this.groupBox7.ResumeLayout(false);
             this.groupBox7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.DampingFactor_NUD)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Mass_NUD)).EndInit();
             this.ResumeLayout(false);
 
         }
