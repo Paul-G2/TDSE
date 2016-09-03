@@ -20,7 +20,7 @@ namespace TdseSolver_2D1P
         private int            m_currentTimeStepIndex  = 0;
         private int            m_totalNumTimeSteps     = 0;
         private VDelegate      m_potential             = null;
-        private bool           m_isTimeDependentV       = false; // Time-dependent potentials are not yet supported
+        private bool           m_isTimeDependentV      = false; // Time-dependent potentials are not yet supported
         private float          m_particleMass          = 0.0f;
         private int            m_reportInterval        = -1;
         private int            m_dampingBorderWidth    = 0;

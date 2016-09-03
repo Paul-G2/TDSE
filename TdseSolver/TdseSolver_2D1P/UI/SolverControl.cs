@@ -276,6 +276,10 @@ namespace TdseSolver_2D1P
                 {
                     msg = e.Error.Message;
                 }
+                if ( (msg != null) && msg.ToLower().Contains("unsupported wavefunction format") )
+                {
+                    msg = "The wavefunction file is invalid, or does not support the attempted operation.";
+                }
                 MessageBox.Show("Abnormal termination.\n\n" + msg);
             }
 

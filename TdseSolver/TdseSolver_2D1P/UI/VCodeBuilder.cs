@@ -81,9 +81,9 @@ namespace TdseSolver_2D1P
         /// <summary>
         /// Computes the potential energy at a given location and time, using the function defined in the current code snippet.
         /// </summary>
-        public float V(float x, float y, float t, float mass, float domainSizeX, float domainSizeY)
+        public float V(float x, float y, float time, float mass, float domainSizeX, float domainSizeY)
         {
-            return (float) m_vCalcMethodInfo.Invoke( null, new object[]{x, y, t, mass, domainSizeX, domainSizeY} );
+            return (float) m_vCalcMethodInfo.Invoke( null, new object[]{x, y, mass, domainSizeX, domainSizeY} );
         }
 
 
@@ -229,11 +229,11 @@ namespace TdseSolver_2D1P
                     "                                                                                                    \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "//                                                                                                  \n" +
-                    "// This method calculates the potential energy at a given location and time.                        \n" +
+                    "// This method calculates the potential energy at a given location.                                 \n" +
                     "//                                                                                                  \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "                                                                                                    \n" +
-                    "public static float V(float x, float y, float t, float mass, float domainSizeX, float domainSizeY)  \n" +
+                    "public static float V(float x, float y, float mass, float domainSizeX, float domainSizeY)           \n" +
                     "{                                                                                                   \n" +
                     "    return 0.0f;                                                                                    \n" +
                     "}                                                                                                   \n";
@@ -252,11 +252,11 @@ namespace TdseSolver_2D1P
                     "                                                                                                    \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "//                                                                                                  \n" +
-                    "// This method calculates the potential energy at a given location and time.                        \n" +
+                    "// This method calculates the potential energy at a given location.                                 \n" +
                     "//                                                                                                  \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "                                                                                                    \n" +
-                    "public static float V(float x, float y, float t, float mass, float domainSizeX, float domainSizeY)  \n" +
+                    "public static float V(float x, float y, float mass, float domainSizeX, float domainSizeY)           \n" +
                     "{                                                                                                   \n" +
                     "    double R = domainSizeX/25;                                                                      \n" +
                     "                                                                                                    \n" +
@@ -264,7 +264,7 @@ namespace TdseSolver_2D1P
                     "    double dy = y - domainSizeY/2;                                                                  \n" +
                     "    double dist = Math.Sqrt(dx*dx + dy*dy);                                                         \n" +
                     "                                                                                                    \n" +
-                    "    return (dist > R) ? 0.0f : 1.0f;                                                                                            \n" +
+                    "    return (dist > R) ? 0.0f : 1.0f;                                                                \n" +
                     "}                                                                                                   \n";
             }
         }
@@ -281,11 +281,11 @@ namespace TdseSolver_2D1P
                     "                                                                                                    \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "//                                                                                                  \n" +
-                    "// This method calculates the potential energy at a given location and time.                        \n" +
+                    "// This method calculates the potential energy at a given location.                                 \n" +
                     "//                                                                                                  \n" +
                     "/////////////////////////////////////////////////////////////////////////////                       \n" +
                     "                                                                                                    \n" +
-                    "public static float V(float x, float y, float t, float mass, float domainSizeX, float domainSizeY)  \n" +
+                    "public static float V(float x, float y, float mass, float domainSizeX, float domainSizeY)           \n" +
                     "{                                                                                                   \n" +
                     "    double WallOffset     = domainSizeX;                                                            \n" +
                     "    double WallThickness  = domainSizeX/50;                                                         \n" +
@@ -298,7 +298,7 @@ namespace TdseSolver_2D1P
                     "        double d = Math.Abs(x-y);                                                                   \n" +
                     "        if ( (d > HoleSeparation + HoleWidth/2) || (d < HoleSeparation-HoleWidth/2) )               \n" +
                     "        {                                                                                           \n" +
-                    "            result = 1.0f;                                                                                                      \n" +
+                    "            result = 1.0f;                                                                          \n" +
                     "        }                                                                                           \n" +
                     "    }                                                                                               \n" +
                     "                                                                                                    \n" +
