@@ -16,4 +16,9 @@ See the "Sample Outputs" folder or [my YouTube channel](https://www.youtube.com/
 
 &nbsp;
 
-![alt text](./UI.png "TDSE Workflow")
+<table border="0" cellspacing="0" cellpadding="0">
+  <tr>
+    <td> <img src="./UI.png" width="500"/> </td>  
+    <td> <video src="https://github.com/Paul-G2/TDSE/assets/9384574/61b68c73-575c-4b08-b0f8-44d56df5b5ce" width="300"/> </td>
+  </tr>
+</table>
