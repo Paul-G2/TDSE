@@ -12,10 +12,8 @@ Currently there are solvers for
 A UI is provided for entering variables such as the average position and momentum of the initial wavepacket, the 
 potential energy function, the grid size, etc. The output is a set of vtk files that can be rendered in ParaView.
 
-See the "Sample Outputs" folder or [my YouTube channel](https://www.youtube.com/channel/UCoCLRhXLs5MFSN7FMb-VlCA) for some results.  
-
+See the "Sample Outputs" folder or [this YouTube channel](https://www.youtube.com/channel/UCoCLRhXLs5MFSN7FMb-VlCA) for some results.  
 &nbsp;
-
 <table border="0" cellspacing="0" cellpadding="0">
   <tr>
     <td> <img src="./UI.png" width="500"/> </td>  
